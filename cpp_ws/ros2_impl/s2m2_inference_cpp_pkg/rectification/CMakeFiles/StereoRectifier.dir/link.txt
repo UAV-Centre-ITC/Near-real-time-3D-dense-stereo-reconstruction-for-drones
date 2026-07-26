@@ -1,0 +1,2 @@
+/bin/ar qc libStereoRectifier.a CMakeFiles/StereoRectifier.dir/src/stereo_rectifier.cpp.o
+/bin/ranlib libStereoRectifier.a
