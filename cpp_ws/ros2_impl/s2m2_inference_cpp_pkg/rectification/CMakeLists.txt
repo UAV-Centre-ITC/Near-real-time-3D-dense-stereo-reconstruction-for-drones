@@ -15,6 +15,7 @@ set(CPP_SOURCES
 src/stereo_rectifier.cpp
 ) 
 # Define the executable
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_library(StereoRectifier ${CPP_SOURCES}) 
 
 # 1. Include your local 'include/' folder

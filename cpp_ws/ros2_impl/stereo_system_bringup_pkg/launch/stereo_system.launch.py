@@ -1,55 +1,63 @@
 import os
 from launch import LaunchDescription
-from launch_ros.actions import Node
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node, ComposableNodeContainer
+from launch_ros.descriptions import ComposableNode
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
 
-    launch_actions = []
-
-    # -----> arguments for optional gdb debugging of nodes
-    gdb_debug_arg_s2m2 = DeclareLaunchArgument(
-        "gdb_debug_s2m2_node",
+    # ---- arguments for optional gdb debugging of the container ----
+    gdb_debug_arg = DeclareLaunchArgument(
+        "gdb_debug_container",
         default_value="false",
-        description="Launch the s2m2 node in gdb debug mode",
+        description="Launch the composed container in gdb debug mode",
     )
-    launch_actions.append(gdb_debug_arg_s2m2)
-    gdb_debug_conf_s2m2 = LaunchConfiguration("gdb_debug_s2m2_node")
+    gdb_debug_conf = LaunchConfiguration("gdb_debug_container")
 
-    gdb_debug_arg_pointcloud_node = DeclareLaunchArgument(
-        "gdb_debug_pointcloud_node",
-        default_value="false",
-        description="Launch the pointcloud node in gdb debug mode",
+    prefix_expr = PythonExpression(
+        [
+            '"xterm -e gdb --args" if "',
+            LaunchConfiguration("gdb_debug_container"),
+            '".lower() == "true" else ""',
+        ]
     )
-    launch_actions.append(gdb_debug_arg_pointcloud_node)
-    gdb_debug_conf_pointcloud_node = LaunchConfiguration("gdb_debug_pointcloud_node")
-    # <----- arguments for optional gdb debugging of nodes
 
-    # S2M2 stereo inference node
     s2m2_pkg_dir = get_package_share_directory("s2m2_inference_cpp_pkg")
-    s2m2_inference_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(s2m2_pkg_dir, "launch", "inference_node.launch.py")
-        ),
-        launch_arguments={"gdb_debug": gdb_debug_conf_s2m2}.items(),
-    )
-    launch_actions.append(s2m2_inference_launch)
+    s2m2_params_file = os.path.join(s2m2_pkg_dir, "config", "params.yaml")
 
-    # Pointcloud generator node
     pointcloud_pkg_dir = get_package_share_directory("pointcloud_pkg")
-    pointcloud_generator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pointcloud_pkg_dir, "launch", "pointcloud_generator.launch.py")
-        ),
-        launch_arguments={"gdb_debug": gdb_debug_conf_pointcloud_node}.items(),
-    )
-    launch_actions.append(pointcloud_generator_launch)
+    pointcloud_params_file = os.path.join(pointcloud_pkg_dir, "config", "params.yaml")
 
-    # GPU monitoring node
+    # Composed container with s2m2_node + pointcloud_generator
+    stereo_container = ComposableNodeContainer(
+        name="stereo_container",
+        namespace="",
+        package="rclcpp_components",
+        executable="component_container_mt",
+        prefix=prefix_expr,
+        composable_node_descriptions=[
+            ComposableNode(
+                package="s2m2_inference_cpp_pkg",
+                plugin="s2m2_inference_cpp_pkg::S2M2Node",
+                name="s2m2_node",
+                parameters=[s2m2_params_file],
+                extra_arguments=[{"use_intra_process_comms": True}],
+            ),
+            ComposableNode(
+                package="pointcloud_pkg",
+                plugin="pointcloud_pkg::PointcloudGenerator",
+                name="pointcloud_generator",
+                parameters=[pointcloud_params_file],
+                extra_arguments=[{"use_intra_process_comms": True}],
+            ),
+        ],
+        output="screen",
+    )
+
+    # GPU monitoring node (standalone — not GPU-related for the stereo path)
     gpu_monitoring_node = Node(
         package="gpu_monitoring_pkg",
         executable="gpu_monitoring_node",
@@ -57,10 +65,14 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"poll_frequency_hz": 20},
-            {"window_averaging_size": 100},  # samples
+            {"window_averaging_size": 100},
         ],
-        #        prefix="xterm -e gdb --args",
     )
-    launch_actions.append(gpu_monitoring_node)
 
-    return LaunchDescription(launch_actions)
+    return LaunchDescription(
+        [
+            gdb_debug_arg,
+            stereo_container,
+            gpu_monitoring_node,
+        ]
+    )

@@ -36,6 +36,8 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <thread>
 
+namespace s2m2_inference_cpp_pkg {
+
 /**
  * @brief Outcome of keyframe evaluation for a new incoming frame.
  * NO_KEYFRAME: insufficient motion to form a stereo pair.
@@ -83,7 +85,7 @@ public:
    * engine, CUDA resources, publishers, subscribers, and the processing worker
    * thread.
    */
-  S2M2Node();
+  S2M2Node(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
 
   /**
    * @brief Destructor, cleans up TensorRT engine, CUDA events, and joins worker
@@ -324,3 +326,5 @@ private:
   double occlusion_threshold_;
   double confidence_threshold_;
 };
+
+} // namespace s2m2_inference_cpp_pkg

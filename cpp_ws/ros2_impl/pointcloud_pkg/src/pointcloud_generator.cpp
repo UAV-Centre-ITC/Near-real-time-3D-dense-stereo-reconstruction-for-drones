@@ -2,7 +2,10 @@
 #define DEBUG_MODE false
 #include "pointcloud_pkg/pointcloud_generator.hpp"
 
-PointcloudGenerator::PointcloudGenerator() : Node("pointcloud_generator") {
+namespace pointcloud_pkg {
+
+PointcloudGenerator::PointcloudGenerator(const rclcpp::NodeOptions &options)
+    : Node("pointcloud_generator", options) {
   // params:
   this->declare_parameter("disparity_topic_name", "/stereo/disparity");
   this->declare_parameter("pointcloud_topic_name", "/pointcloud");
@@ -46,14 +49,15 @@ void PointcloudGenerator::pointcloudCallback(
   // left rectified setup---------------------->
   auto header = left_rectified_msg->header;
   auto start_img_conv = std::chrono::high_resolution_clock::now();
-  left_rectified_ = cv_bridge::toCvCopy(left_rectified_msg, "rgb8")->image;
+  left_rectified_shared_ = cv_bridge::toCvShare(left_rectified_msg, "rgb8");
+  left_rectified_ = left_rectified_shared_->image;
   auto end_img_conv = std::chrono::high_resolution_clock::now();
   auto dur_ms_img_conv =
       std::chrono::duration<double, std::milli>(end_img_conv - start_img_conv)
           .count();
   if (profiler_writes_count_ < 50) {
-    profiler_file_ << "Image conversion duration: "
-                   << dur_ms_img_conv << "ms" << std::endl;
+    profiler_file_ << "Image conversion duration: " << dur_ms_img_conv << "ms"
+                   << std::endl;
   }
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "Image conversion duration: %.3f ms",
@@ -63,10 +67,9 @@ void PointcloudGenerator::pointcloudCallback(
 
   // points3d setup ---------------------->
   auto start_points3d_conversion = std::chrono::high_resolution_clock::now();
-  cv_bridge::CvImagePtr points3D_ptr;
-  points3D_ptr = cv_bridge::toCvCopy(points3d_msg,
-                                     sensor_msgs::image_encodings::TYPE_32FC4);
-  cv::Mat points3D = points3D_ptr->image;
+  points3d_shared_ = cv_bridge::toCvShare(
+      points3d_msg, sensor_msgs::image_encodings::TYPE_32FC4);
+  cv::Mat points3D = points3d_shared_->image;
   auto end_points3d_conversion = std::chrono::high_resolution_clock::now();
   auto dur_ms_points3d_conv =
       std::chrono::duration<double, std::milli>(end_points3d_conversion -
@@ -112,8 +115,8 @@ void PointcloudGenerator::pointcloudCallback(
       std::chrono::duration<double, std::milli>(end_msg_setup - start_msg_setup)
           .count();
   if (profiler_writes_count_ < 50) {
-    profiler_file_ << "PointCloud2 message setup duration: "
-                   << dur_ms_msg_setup << "ms" << std::endl;
+    profiler_file_ << "PointCloud2 message setup duration: " << dur_ms_msg_setup
+                   << "ms" << std::endl;
   }
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "PointCloud2 message setup duration: %.3f ms",
@@ -166,12 +169,11 @@ void PointcloudGenerator::pointcloudCallback(
       std::chrono::duration<double, std::milli>(end_publish - start_publish)
           .count();
   if (profiler_writes_count_ < 50) {
-    profiler_file_ << "Publish duration: "
-                   << dur_ms_publish << "ms" << std::endl;
+    profiler_file_ << "Publish duration: " << dur_ms_publish << "ms"
+                   << std::endl;
   }
 #if DEBUG_MODE
-  RCLCPP_INFO(this->get_logger(), "Publish duration: %.3f ms",
-              dur_ms_publish);
+  RCLCPP_INFO(this->get_logger(), "Publish duration: %.3f ms", dur_ms_publish);
 #endif
 
   // optionally save the pointcloud using PCL :
@@ -190,14 +192,19 @@ void PointcloudGenerator::pointcloudCallback(
     profiler_writes_count_++;
   }
 }
-//
+
+} // namespace pointcloud_pkg
+
+#include "rclcpp_components/register_node_macro.hpp"
+
+RCLCPP_COMPONENTS_REGISTER_NODE(pointcloud_pkg::PointcloudGenerator)
 
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
   rclcpp::init(argc, argv);
-  std::shared_ptr<PointcloudGenerator> node =
-      std::make_shared<PointcloudGenerator>();
+  std::shared_ptr<pointcloud_pkg::PointcloudGenerator> node =
+      std::make_shared<pointcloud_pkg::PointcloudGenerator>();
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

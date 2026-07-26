@@ -12,7 +12,10 @@
 
 #define HOMOGENEOUS_DIMS 4
 
-S2M2Node::S2M2Node() : Node("s2m2_node"), rectifier_{STEREO_INTRINSICS} {
+namespace s2m2_inference_cpp_pkg {
+
+S2M2Node::S2M2Node(const rclcpp::NodeOptions &options)
+    : Node("s2m2_node", options), rectifier_{STEREO_INTRINSICS} {
 
   RCLCPP_DEBUG(this->get_logger(), "S2M2Node constructor");
   // Params :
@@ -215,7 +218,7 @@ std::vector<cv::Mat> S2M2Node::preprocessInputs(cv::Mat &left_image,
   pass_t.padding_ms =
       std::chrono::duration<double, std::milli>(end_pad - start_pad).count();
   RCLCPP_DEBUG(this->get_logger(), "Preprocess fit duration: %.3f ms",
-              pass_t.padding_ms);
+               pass_t.padding_ms);
   // Store a clone of the processed left image before NCHW conversion,
   // so it can be published later:
   left_pass_processed_ = left_processed.clone();
@@ -227,7 +230,7 @@ std::vector<cv::Mat> S2M2Node::preprocessInputs(cv::Mat &left_image,
   pass_t.nchw_ms =
       std::chrono::duration<double, std::milli>(end_nchw - start_nchw).count();
   RCLCPP_DEBUG(this->get_logger(), "NCHW conversion duration: %.3f ms",
-              pass_t.nchw_ms);
+               pass_t.nchw_ms);
   return {left_processed, right_processed};
 }
 
@@ -276,8 +279,8 @@ STEREO_SETUP_NOW S2M2Node::evaluateKeyframe(
 
   // No keyframe detected, return NOKEYFRAME:
   RCLCPP_DEBUG(this->get_logger(),
-              "Translation vector is too small: %.3f , %.3f , %.3f", dx, dy,
-              dz);
+               "Translation vector is too small: %.3f , %.3f , %.3f", dx, dy,
+               dz);
   return STEREO_SETUP_NOW::NO_KEYFRAME;
 }
 
@@ -320,7 +323,7 @@ void S2M2Node::processingThread() {
     }
     if (stereo_setup == STEREO_SETUP_NOW::NO_KEYFRAME) {
       RCLCPP_DEBUG(this->get_logger(),
-                  "Received image is not a keyframe. Returning...");
+                   "Received image is not a keyframe. Returning...");
       // Simply skip
       continue;
     }
@@ -412,8 +415,7 @@ void S2M2Node::processValidPair(cv::Mat &left_image, cv::Mat &right_image,
 
   // Reproject disparity to 3D points:
   cv::cuda::GpuMat &disp_gpu = s2m2_outputs[0];
-  runReprojectionTo3D(disp_gpu, Qmatrix, 0, 0,
-                      pass_t);
+  runReprojectionTo3D(disp_gpu, Qmatrix, 0, 0, pass_t);
 
   runTransformationWC(T_WC, pass_t);
 
@@ -430,7 +432,7 @@ void S2M2Node::processValidPair(cv::Mat &left_image, cv::Mat &right_image,
                               end_total_pair - start_total_pair)
                               .count();
   RCLCPP_DEBUG(this->get_logger(), "Total valid pair duration: %.3f ms",
-              timings.pair_total_ms);
+               timings.pair_total_ms);
   // Flush all accumulated timings for this pair with a single I/O call.
   if (profiler_writes_count_ < 50) {
     std::ostringstream oss;
@@ -479,7 +481,8 @@ S2M2Node::extractTransformComponents(Eigen::Isometry3d T_previous_to_now) {
   return {R_relative_cv, t_relative_cv};
 }
 
-void S2M2Node::runTransformationWC(const TransformMatrix &T_WC, PassTimings &pass_t) {
+void S2M2Node::runTransformationWC(const TransformMatrix &T_WC,
+                                   PassTimings &pass_t) {
   RCLCPP_DEBUG(this->get_logger(), "The T matrix is: \n");
   for (int i = 0; i < 16; i++) {
     RCLCPP_DEBUG(this->get_logger(), "%f ", T_WC.data[i]);
@@ -495,8 +498,8 @@ void S2M2Node::runTransformationWC(const TransformMatrix &T_WC, PassTimings &pas
                        end_transform_kernel_);
   pass_t.transform_ms = static_cast<double>(elapsed_transform_kernel_ms);
   RCLCPP_DEBUG(this->get_logger(),
-              "Coordinate transform CUDA kernel duration: %.3f ms",
-              pass_t.transform_ms);
+               "Coordinate transform CUDA kernel duration: %.3f ms",
+               pass_t.transform_ms);
 }
 
 void S2M2Node::setLeftRightImages(
@@ -570,7 +573,7 @@ void S2M2Node::rectifyFullResolutionImages(cv::Mat &left_image,
   rectifier_.calculateMaps(relative_Rt_previous_to_current_.R_rel,
                            relative_Rt_previous_to_current_.t_rel);
   RCLCPP_DEBUG(this->get_logger(), "----Baseline of rectified stereo: %f",
-              rectifier_.getBaseline());
+               rectifier_.getBaseline());
   auto start_rectify_left = std::chrono::high_resolution_clock::now();
   left_image_rectified_ = rectifier_.rectifyLeft(left_image);
 
@@ -579,7 +582,7 @@ void S2M2Node::rectifyFullResolutionImages(cv::Mat &left_image,
                                 end_rectify_left - start_rectify_left)
                                 .count();
   RCLCPP_DEBUG(this->get_logger(), "Rectification left duration: %.3f ms",
-              timings.rectify_left_ms);
+               timings.rectify_left_ms);
   auto start_rectify_right = std::chrono::high_resolution_clock::now();
   right_image_rectified_ = rectifier_.rectifyRight(right_image);
   auto end_rectify_right = std::chrono::high_resolution_clock::now();
@@ -590,9 +593,9 @@ void S2M2Node::rectifyFullResolutionImages(cv::Mat &left_image,
                                  end_rectify_right - start_rectify)
                                  .count();
   RCLCPP_DEBUG(this->get_logger(), "Rectification right duration: %.3f ms",
-              timings.rectify_right_ms);
+               timings.rectify_right_ms);
   RCLCPP_DEBUG(this->get_logger(), "Rectification total duration: %.3f ms",
-              timings.rectify_total_ms);
+               timings.rectify_total_ms);
   if (this->get_parameter("save_rectified_images").as_bool()) {
     saveRectifiedImages(
         left_image_rectified_, right_image_rectified_,
@@ -625,10 +628,11 @@ void S2M2Node::filterPoints3D(cv::cuda::GpuMat &confidence,
   cudaEventElapsedTime(&elapsed_filter_ms, start_filter_, end_filter_);
   pass_t.filter_ms = static_cast<double>(elapsed_filter_ms);
   RCLCPP_DEBUG(this->get_logger(), "Filter points3D in GPU duration: %.3f ms",
-              pass_t.filter_ms);
+               pass_t.filter_ms);
 }
 
-void S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp_gpu, const cv::Mat &Qmatrix,
+void S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp_gpu,
+                                   const cv::Mat &Qmatrix,
                                    const int patch_offset_x,
                                    const int patch_offset_y,
                                    PassTimings &pass_t) {
@@ -642,7 +646,7 @@ void S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp_gpu, const cv::Mat &Qm
   cudaEventElapsedTime(&elapsed_reproject_ms, start_reproject_, end_reproject_);
   pass_t.reproject_ms = static_cast<double>(elapsed_reproject_ms);
   RCLCPP_DEBUG(this->get_logger(), "Reprojection in GPU duration: %.3f ms",
-              pass_t.reproject_ms);
+               pass_t.reproject_ms);
 }
 
 std::vector<cv::cuda::GpuMat>
@@ -700,54 +704,78 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair,
   cudaEventElapsedTime(&elapsed_inference_ms, start_inference_, end_inference_);
   pass_t.inference_ms = static_cast<double>(elapsed_inference_ms);
   RCLCPP_DEBUG(this->get_logger(), "Inference in GPU duration: %.3f ms",
-              pass_t.inference_ms);
+               pass_t.inference_ms);
   return {disp_gpu, occ_gpu, conf_gpu};
 }
 
 void S2M2Node::publishMessages(PassTimings &pass_t) {
   cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
   auto start_download_and_publish = std::chrono::high_resolution_clock::now();
-  cudaStreamSynchronize(
-      stream_); // Wait for all CUDA operations to finish (important!)
-  // Download the 3D points from GPU to CPU:
-  cv::Mat points3d_homog;
-  points3d_transformed_homog_gpu_.download(points3d_homog, cv_stream);
-  // convert points3d to ROS message:
-  sensor_msgs::msg::Image points3d_msg;
-  points3d_msg.header.frame_id = "left_camera_optical_frame";
-  cv_bridge::CvImage cv_image_points3d(points3d_msg.header, "32FC4",
-                                       points3d_homog);
-  cv_image_points3d.toImageMsg(points3d_msg);
-  // Create the processed left image message:
-  sensor_msgs::msg::Image left_img_msg;
-  left_img_msg.header.frame_id = "left_camera_optical_frame";
-  cv_bridge::CvImage cv_image_left(left_img_msg.header, "rgb8",
-                                   left_pass_processed_);
-  cv_image_left.toImageMsg(left_img_msg);
-  // Set all timestamps to now :
-  auto time_now = this->now();
-  left_img_msg.header.stamp = time_now;
-  points3d_msg.header.stamp = time_now;
-  RCLCPP_DEBUG(this->get_logger(), "-----------TIMESTAMPS CHECK-----------");
-  RCLCPP_DEBUG(this->get_logger(), "publishing left=%d.%d points3d=%d.%d",
-              left_img_msg.header.stamp.sec, left_img_msg.header.stamp.nanosec,
-              points3d_msg.header.stamp.sec, points3d_msg.header.stamp.nanosec);
-  // Publish all messages:
-  left_processed_pub_->publish(left_img_msg);
-  points3d_pub_->publish(points3d_msg);
+
+  // Wait for all CUDA operations to finish
+  cudaStreamSynchronize(stream_);
+
+  // Allocate the unique_ptr for true zero-copy IPC
+  auto points3d_msg = std::make_unique<sensor_msgs::msg::Image>();
+  points3d_msg->header.frame_id = "left_camera_optical_frame";
+  points3d_msg->header.stamp = this->now();
+  points3d_msg->height = model_input_height_;
+  points3d_msg->width = model_input_width_;
+  points3d_msg->encoding = "32FC4";
+  points3d_msg->is_bigendian = false;
+  points3d_msg->step =
+      model_input_width_ * 4 * sizeof(float); // 4 channels of 32-bit floats
+
+  // Pre-allocate the exact size in the ROS message vector
+  size_t points3d_size = points3d_msg->step * points3d_msg->height;
+  points3d_msg->data.resize(points3d_size);
+
+  // Wrap a cv::Mat AROUND the ROS message's memory buffer (No allocation!)
+  cv::Mat points3d_mapped(model_input_height_, model_input_width_, CV_32FC4,
+                          points3d_msg->data.data());
+
+  // Download from GPU directly into the ROS message memory
+  points3d_transformed_homog_gpu_.download(points3d_mapped, cv_stream);
+
+  auto left_img_msg = std::make_unique<sensor_msgs::msg::Image>();
+  left_img_msg->header.frame_id = "left_camera_optical_frame";
+  left_img_msg->header.stamp = points3d_msg->header.stamp;
+  left_img_msg->height = left_pass_processed_.rows;
+  left_img_msg->width = left_pass_processed_.cols;
+  left_img_msg->encoding = "rgb8";
+  left_img_msg->is_bigendian = false;
+  left_img_msg->step = left_pass_processed_.cols * 3;
+
+  size_t left_size = left_img_msg->step * left_img_msg->height;
+  left_img_msg->data.resize(left_size);
+
+  // Wrap a cv::Mat around the ROS message and copy the CPU image directly into
+  // it
+  cv::Mat left_mapped(left_pass_processed_.rows, left_pass_processed_.cols,
+                      CV_8UC3, left_img_msg->data.data());
+  left_pass_processed_.copyTo(left_mapped);
+
+  left_processed_pub_->publish(std::move(left_img_msg));
+  points3d_pub_->publish(std::move(points3d_msg));
+
   auto end_download_and_publish = std::chrono::high_resolution_clock::now();
   pass_t.download_publish_ms =
       std::chrono::duration<double, std::milli>(end_download_and_publish -
                                                 start_download_and_publish)
           .count();
+
   RCLCPP_DEBUG(this->get_logger(), "Download and publish duration: %.3f ms",
-              pass_t.download_publish_ms);
+               pass_t.download_publish_ms);
 }
+} // namespace s2m2_inference_cpp_pkg
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(s2m2_inference_cpp_pkg::S2M2Node)
 
 int main(int argc, char **argv) {
   rclcpp::init(argc, argv);
   rclcpp::executors::MultiThreadedExecutor executor;
-  auto node = std::make_shared<S2M2Node>();
+  auto node = std::make_shared<s2m2_inference_cpp_pkg::S2M2Node>();
   executor.add_node(node);
   executor.spin();
   rclcpp::shutdown();

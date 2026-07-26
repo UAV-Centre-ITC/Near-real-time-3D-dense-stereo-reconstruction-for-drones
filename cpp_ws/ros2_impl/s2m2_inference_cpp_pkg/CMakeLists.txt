@@ -11,6 +11,7 @@ set(OpenCV_DIR "/opt/opencv_cuda/lib/cmake/opencv4")
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(my_custom_interfaces REQUIRED)
@@ -56,24 +57,25 @@ include_directories(
 )
 add_subdirectory(rectification)
 
-add_executable(s2m2_node ${SOURCE_FILES})
+add_library(s2m2_node_component SHARED ${SOURCE_FILES})
 
-target_include_directories(s2m2_node PUBLIC
+target_include_directories(s2m2_node_component PUBLIC
   $<BUILD_INTERFACE:/usr/include/eigen3>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rectification/include>
   $<INSTALL_INTERFACE:include)
-target_compile_features(s2m2_node PUBLIC cxx_std_17)  # Require C++17
+target_compile_features(s2m2_node_component PUBLIC cxx_std_17)  # Require C++17
 
-target_link_libraries(s2m2_node
+target_link_libraries(s2m2_node_component
   StereoRectifier
   ${OpenCV_LIBS}
   CUDA::cudart
   TensorRT::TensorRT
   )
 
-ament_target_dependencies(s2m2_node 
+ament_target_dependencies(s2m2_node_component 
 	rclcpp 
+	rclcpp_components
 	sensor_msgs
 	geometry_msgs
 	my_custom_interfaces
@@ -85,8 +87,13 @@ ament_target_dependencies(s2m2_node
 	tf2_eigen
 ) 
 
-install(TARGETS s2m2_node
-  DESTINATION lib/${PROJECT_NAME})
+rclcpp_components_register_node(s2m2_node_component
+  PLUGIN "s2m2_inference_cpp_pkg::S2M2Node"
+  EXECUTABLE s2m2_node
+)
+
+install(TARGETS s2m2_node_component
+  DESTINATION lib)
 
 install(DIRECTORY 
 config

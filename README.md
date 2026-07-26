@@ -115,24 +115,25 @@ You can use the 4 images I used (which produce 3 stereo pairs), for convenience 
 
 ### Launch 
 
-We use a separate package for launching our nodes which is a common practice in ROS2:
+We use a separate package for launching our nodes which is a common practice in ROS2. The two nodes are placed in the same ROS container
+which ensures that we can use intra-process communication. To launch the container, simply run :
 
 `ros2 launch stereo_system_bringup_pkg stereo_system_bringup.launch.py`
 
 
 ## Debug - GDB support 
 
-For debugging, gdb can be attached to a node, as an extra argument at launch time. 
+For debugging, gdb can be attached to the container, as an extra argument at launch time. 
 
-To install it : 
+To install gdb : 
 ```
 sudo apt update
 sudo apt install gdb libc6-dbg
 ```
 
-I used xterm for the debugging terminal session. Example to activate debugging both s2m2 inference and the pointcloud node: 
+I used xterm for the debugging terminal session. Run:
 
-`ros2 launch stereo_system_bringup_pkg stereo_system_bringup.launch.py gdb_debug_s2m2_node:=true gdb_debug_pointcloud_node:=true`
+`ros2 launch stereo_system_bringup_pkg stereo_system_bringup.launch.py gdb_debug_container:=true`
  
 
 Also, make sure to enable DEBUG build from 

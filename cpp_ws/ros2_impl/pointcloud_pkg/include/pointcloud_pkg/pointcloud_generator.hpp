@@ -21,9 +21,11 @@
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 
+namespace pointcloud_pkg {
+
 class PointcloudGenerator : public rclcpp::Node {
 public:
-  PointcloudGenerator();
+  PointcloudGenerator(const rclcpp::NodeOptions &options = rclcpp::NodeOptions());
   ~PointcloudGenerator() = default;
 
 private:
@@ -31,6 +33,8 @@ private:
       message_filters::sync_policies::ExactTime<sensor_msgs::msg::Image,
                                                 sensor_msgs::msg::Image>;
   cv::Mat left_rectified_;
+  cv_bridge::CvImageConstPtr left_rectified_shared_;
+  cv_bridge::CvImageConstPtr points3d_shared_;
   std::string profiler_dirpath_;
   std::ofstream profiler_file_;
   int profiler_writes_count_ = 0;
@@ -47,3 +51,5 @@ private:
       const sensor_msgs::msg::Image::ConstSharedPtr &left_rectified_msg,
       const sensor_msgs::msg::Image::ConstSharedPtr &points3d_msg);
 };
+
+} // namespace pointcloud_pkg
