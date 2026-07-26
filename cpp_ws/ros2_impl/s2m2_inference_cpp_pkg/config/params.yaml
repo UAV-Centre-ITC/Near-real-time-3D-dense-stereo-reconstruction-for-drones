@@ -14,9 +14,8 @@ s2m2_node:
     # max_keyframe_Z: 0.5 #this should be low so that stereo works properly.  
     time_profiling_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/assets/"
     rectified_images_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/assets/"
-    scale_factor: 0.5
-    target_input_height: 1728 
-    target_input_width: 2304
+    model_input_height: 1728 
+    model_input_width: 2304
     occlusion_threshold: 0.5 #marginal probability, higher means more certain that the pixel is valid, and common in left,right images. 
     confidence_threshold: 0.1 #local sum of probabilities, higher means more sharp prob. distribution around the pixel, so more likely valid.
     save_disparity: false 

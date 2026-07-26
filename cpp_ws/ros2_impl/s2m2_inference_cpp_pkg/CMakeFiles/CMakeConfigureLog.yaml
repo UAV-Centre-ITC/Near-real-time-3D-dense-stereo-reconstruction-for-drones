@@ -98,37 +98,3 @@ events:
       Cuda compilation tools, release 13.2, V13.2.51
       Build cuda_13.2.r13.2/compiler.37434383_0
 ...
-
----
-events:
-  -
-    kind: "message-v1"
-    backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:1131 (message)"
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCUDACompiler.cmake:75 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
-      - "CMakeLists.txt:2 (project)"
-    message: |
-      Checking whether the CUDA compiler is NVIDIA using "" matched "nvcc: NVIDIA \\(R\\) Cuda compiler driver":
-      nvcc: NVIDIA (R) Cuda compiler driver
-      Copyright (c) 2005-2026 NVIDIA Corporation
-      Built on Mon_Mar_02_09:52:23_PM_PST_2026
-      Cuda compilation tools, release 13.2, V13.2.51
-      Build cuda_13.2.r13.2/compiler.37434383_0
-...
-
----
-events:
-  -
-    kind: "message-v1"
-    backtrace:
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:1131 (message)"
-      - "/usr/share/cmake-3.28/Modules/CMakeDetermineCUDACompiler.cmake:75 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
-      - "CMakeLists.txt:2 (project)"
-    message: |
-      Checking whether the CUDA compiler is NVIDIA using "" matched "nvcc: NVIDIA \\(R\\) Cuda compiler driver":
-      nvcc: NVIDIA (R) Cuda compiler driver
-      Copyright (c) 2005-2026 NVIDIA Corporation
-      Built on Mon_Mar_02_09:52:23_PM_PST_2026
-      Cuda compilation tools, release 13.2, V13.2.51
-      Build cuda_13.2.r13.2/compiler.37434383_0
-...

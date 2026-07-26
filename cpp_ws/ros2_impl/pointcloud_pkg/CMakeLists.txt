@@ -6,7 +6,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON) #for neovim clangd
-set (CMAKE_BUILD_TYPE Release)
+set (CMAKE_BUILD_TYPE RelWithDebInfo)
 
 #Packages needed : 
 find_package(ament_cmake REQUIRED)

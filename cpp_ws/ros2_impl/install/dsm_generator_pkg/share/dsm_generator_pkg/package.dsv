@@ -1,5 +1,0 @@
-source;share/dsm_generator_pkg/local_setup.bash
-source;share/dsm_generator_pkg/local_setup.dsv
-source;share/dsm_generator_pkg/local_setup.ps1
-source;share/dsm_generator_pkg/local_setup.sh
-source;share/dsm_generator_pkg/local_setup.zsh

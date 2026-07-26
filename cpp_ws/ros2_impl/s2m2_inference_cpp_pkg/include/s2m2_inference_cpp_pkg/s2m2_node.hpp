@@ -8,12 +8,12 @@
 #include "trt_file_reader.hpp"
 #include "unsupported/Eigen/CXX11/Tensor"
 #include "utils/image_helpers.hpp"
-#include <Eigen/Geometry>
-#include <chrono>
+#include <cassert>
 #include <cuda_fp16.h>
 #include <cuda_runtime.h>
 #include <cv_bridge/cv_bridge.h>
 #include <fstream>
+#include <map>
 #include <opencv2/core/cuda.hpp>
 #include <opencv2/core/cuda_stream_accessor.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -24,151 +24,101 @@
 #include <opencv2/opencv.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <string>
-#include <thread>
 
-/**
- * @brief ROS2 node that performs disparity inference using TensorRT,
- *        reprojects to 3D points, transforms them to world coordinates,
- *        filters invalid points, and publishes the resulting point cloud.
- *
- * The node loads a set of pre-captured stereo image pairs, rectifies them,
- * runs the S2M2 TensorRT model for disparity estimation, and produces a
- * filtered 3D point cloud in the world coordinate frame. Processing is
- * orchestrated by startProcessing() and is triggered once via a startup
- * timer. Multiple stereo pairs (image pairs 759/760, 760/761, 761/762)
- * are processed sequentially.
- */
 class S2M2Node : public rclcpp::Node {
 public:
   /**
-   * @brief Constructs the S2M2Node, initializing ROS2 parameters,
-   *        the TensorRT engine, CUDA resources, publishers, and the
-   *        startup timer that triggers startProcessing().
+   * @brief Constructs the S2M2Node, initializing ROS2 parameters, TensorRT
+   * engine, CUDA resources, publishers, subscribers, and the processing worker
+   * thread.
    */
   S2M2Node();
 
   /**
-   * @brief Destructor, cleans up the TensorRT engine, execution context,
-   *        runtime, and CUDA events.
+   * @brief Destructor, cleans up TensorRT engine, CUDA events, and joins worker
+   * thread.
    */
   ~S2M2Node();
 
   /**
-   * @brief Loads and allocates CUDA buffers by querying the TensorRT engine
-   *        for input/output tensor sizes. Allocates 5 buffers for
-   *        {input_left, input_right, output_disp, output_occ, output_conf}
-   *        plus an extra buffer for the 3D point cloud.
+   * @brief Loads and allocates CUDA buffers for TensorRT input/output tensors.
    */
   void loadCudaBuffers();
 
   /**
-   * @brief Pads the rectified stereo pair to dimensions that are multiples
-   *        of 32 and converts the images from HWC to NCHW layout.
-   * @param left_rectified  Left rectified image.
-   * @param right_rectified Right rectified image.
-   * @return A vector containing the processed left and right images
-   *         (padded, in NCHW format).
+   * @brief Preprocesses stereo image pair: rectification, resizing, padding,
+   * and NCHW conversion.
+   * @param left_image Input left camera image (cv::Mat).
+   * @param right_image Input right camera image (cv::Mat).
    */
-  [[nodiscard]] std::vector<cv::Mat> preprocessInputs(cv::Mat &left_rectified,
-                                                      cv::Mat &right_rectified);
+  [[nodiscard]] std::vector<cv::Mat> preprocessInputs(cv::Mat &left_image,
+                                                      cv::Mat &right_image);
+
+  void rectifyFullResolutionImages(cv::Mat &left_image, cv::Mat &right_image,
+                                   const StereoExtrinsics &extrinsics);
 
   /**
-   * @brief Resizes the input images using scale_factor_, rectifies them
-   *        using the provided extrinsics, and optionally saves the
-   *        rectified images to disk.
-   * @param left_image  Original left camera image.
-   * @param right_image Original right camera image.
-   * @param extrinsics  Extrinsic parameters for stereo rectification.
-   */
-  void rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
-                     const StereoExtrinsics &extrinsics);
-
-  /**
-   * @brief Copies the preprocessed stereo pair to GPU, runs TensorRT
-   *        inference, and records GPU timing.
-   * @param processed_pair A vector of [left, right] images in NCHW format
-   *                       (output of preprocessInputs).
-   * @return A vector of GPU Mats: {disparity, occlusion, confidence}.
+   * @brief Executes TensorRT inference on preprocessed stereo images,
+   * reprojects disparity to 3D points, transforms to world frame, and publishes
+   * results.
    */
   [[nodiscard]] std::vector<cv::cuda::GpuMat>
   runInference(std::vector<cv::Mat> &processed_pair);
 
-  /**
-   * @brief Reprojects the disparity map to a homogeneous 3D point cloud
-   *        using the Q matrix from rectification.
-   * @param disp    GPU disparity map.
-   * @param Qmatrix 4x4 reprojection matrix (CV_32FC1).
-   * @return GPU Mat containing the homogeneous 3D points (CV_32FC4).
-   */
   [[nodiscard]] cv::cuda::GpuMat runReprojectionTo3D(cv::cuda::GpuMat &disp,
-                                                     cv::Mat &Qmatrix);
+                                                     cv::Mat &Qmatrix,
+                                                     int offset_x,
+                                                     int offset_y);
 
-  /**
-   * @brief Transforms the 3D point cloud from the rectified left camera
-   *        frame to the world coordinate frame using the provided
-   *        transformation matrix.
-   * @param points3d_homog_gpu Homogeneous 3D points in camera frame.
-   * @param T_WC               4x4 transformation matrix (camera→world).
-   * @return GPU Mat containing the transformed 3D points (CV_32FC4).
-   */
   [[nodiscard]] cv::cuda::GpuMat
   runTransformationWC(cv::cuda::GpuMat &points3d_homog_gpu,
-                      const TransformMatrix &T_WC);
+                      const StereoExtrinsics &extrinsics);
+
+  [[nodiscard]] std::map<std::string, cv::Rect>
+  splitImageTo4Patches(cv::Mat &original_img);
+
+  void publishMessages(const cv::cuda::GpuMat &points3d_homog_transformed_gpu);
 
   /**
-   * @brief Computes the 4x4 transformation matrix that maps points from
-   *        the rectified left camera frame to the world coordinate frame.
-   *        The transform combines the inverse of the rectification rotation
-   *        with the inverse of the camera-to-world extrinsic rotation.
-   * @param extrinsics Extrinsic parameters of the left camera.
-   * @return The homogeneous 4x4 transformation matrix (camera→world).
+   * @brief Converts image from OpenCV HWC format to TensorRT NCHW format.
+   * @param img Input/output cv::Mat image, transformed in-place.
+   */
+  void convertToNCHW(cv::Mat &img);
+
+  /**
+   * @brief Calculates and stores the transform need to take the 3D points
+   * from the rectified left camera frame to the world frame. It first undoes
+   * the rotation produced through stereoRectify(), and then applies the inverse
+   * of the CW transform that is given through the R,t of pix4d extrinsics.
+   * @param  extrinsics Extrinsic parameters of the left camera.
+   * world coordinates.
    */
   [[nodiscard]] TransformMatrix
   generateTransformWC(const StereoExtrinsics &extrinsics);
 
   /**
-   * @brief Downloads the transformed 3D point cloud from GPU to CPU,
-   *        publishes the left processed image and the point cloud as
-   *        ROS2 messages, and optionally saves/visualizes the disparity.
-   * @param transformed_points3d Transformed point cloud on GPU.
-   * @param confidence           Confidence buffer from inference.
-   * @param occlusion            Occlusion buffer from inference.
-   */
-  void publishMessages(const cv::cuda::GpuMat &transformed_points3d,
-                       const cv::cuda::GpuMat &confidence,
-                       const cv::cuda::GpuMat &occlusion);
-
-  /**
-   * @brief Converts an image from OpenCV HWC (height, width, channels)
-   *        layout to TensorRT NCHW layout by splitting the channels
-   *        and concatenating them vertically.
-   * @param img Input/output image modified in-place.
-   */
-  void convertToNCHW(cv::Mat &img);
-
-  /**
-   * @brief Filters the 3D point cloud by zeroing out points with low
-   *        confidence or high occlusion values according to the configured
-   *        thresholds.
-   * @param points3d  3D point cloud modified in-place on GPU.
-   * @param confidence Confidence values from the S2M2 model.
-   * @param occlusion  Occlusion values from the S2M2 model.
-   * @param stream     CUDA stream for asynchronous execution.
+   * @brief Filters 3D points by zeroing out invalid points based on confidence
+   * and occlusion thresholds.
+   * @param points3d The homogeneous 3D point cloud (modified in-place on GPU).
+   * @param confidence Confidence values from the S2M2 network.
+   * @param occlusion Occlusion values from the S2M2 network.
+   * @param stream CUDA stream for asynchronous execution.
    */
   void filterPoints3D(cv::cuda::GpuMat &points3d, cv::cuda::GpuMat &confidence,
                       cv::cuda::GpuMat &occlusion, cv::cuda::Stream &stream);
 
   /**
-   * @brief Orchestrates the full processing pipeline for all three stereo
-   *        pairs: rectification, preprocessing, inference, reprojection,
-   *        coordinate transformation, filtering, and publishing. Timing
-   *        for each pair is recorded and written to the profiler file.
+   * @brief Processes all three stereo pairs sequentially: preprocess, infer,
+   * transform, filter, and publish results.
    */
   void startProcessing();
 
 private:
   rclcpp::TimerBase::SharedPtr startup_timer_;
   StereoRectifier rectifier_;
+
+  bool current_frame_is_left_;
+  bool is_first_frame_ = true;
 
   /* CUDA and TensorRT */
   std::string engine_path_;
@@ -194,11 +144,10 @@ private:
   cv::Mat image_762_;
   cv::Mat left_image_rectified_;
   cv::Mat right_image_rectified_;
-  sensor_msgs::msg::Image left_image_msg_;
-  std::vector<float> disparity_out_buffer_;
-  std::vector<float> confidence_out_buffer_;
-  std::vector<float> occlusion_out_buffer_;
-  int new_height_;
+  sensor_msgs::msg::Image left_image_msg_; // for coloring the pointcloud
+  int model_input_height_;
+  int model_input_width_;
+  int new_height_; // of padded resized images
   int new_width_;
   // Time profiling
   std::string profiler_dirpath_;

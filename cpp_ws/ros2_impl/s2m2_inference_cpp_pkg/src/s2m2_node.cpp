@@ -11,7 +11,7 @@
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/logging.hpp>
 
-#define DEBUG_MODE false
+#define DEBUG_MODE true
 #define HOMOGENEOUS_DIMS 4
 #define NON_HOMOGENEOUS_DIMS 3
 
@@ -27,9 +27,8 @@ S2M2Node::S2M2Node() : Node("s2m2_node"), rectifier_{STEREO_INTRINSICS, false} {
   this->declare_parameter("image760_path", "");
   this->declare_parameter("image761_path", "");
   this->declare_parameter("image762_path", "");
-  this->declare_parameter("scale_factor", 0.5);
-  this->declare_parameter("target_input_height", 0);
-  this->declare_parameter("target_input_width", 0);
+  this->declare_parameter("model_input_height", 0);
+  this->declare_parameter("model_input_width", 0);
   this->declare_parameter("save_disparity", false);
   this->declare_parameter("save_rectified_images", false);
   this->declare_parameter("rectified_images_dirpath", "");
@@ -40,13 +39,11 @@ S2M2Node::S2M2Node() : Node("s2m2_node"), rectifier_{STEREO_INTRINSICS, false} {
 
   // Get params :
   engine_path_ = this->get_parameter("engine_filepath").as_string();
-  int target_input_height = this->get_parameter("target_input_height").as_int();
-  int target_input_width = this->get_parameter("target_input_width").as_int();
+  model_input_height_ = this->get_parameter("model_input_height").as_int();
+  model_input_width_ = this->get_parameter("model_input_width").as_int();
   profiler_dirpath_ = this->get_parameter("time_profiling_dirpath").as_string();
   profiler_file_ =
       std::ofstream(profiler_dirpath_ + "profiler_s2m2node.txt", std::ios::out);
-  scale_factor_ = this->get_parameter("scale_factor").as_double();
-  rectifier_.scaleIntrinsics(scale_factor_);
   confidence_threshold_ =
       this->get_parameter("confidence_threshold").as_double();
   occlusion_threshold_ = this->get_parameter("occlusion_threshold").as_double();
@@ -65,11 +62,6 @@ S2M2Node::S2M2Node() : Node("s2m2_node"), rectifier_{STEREO_INTRINSICS, false} {
   cudaEventCreate(&end_reproject_);
   cudaEventCreate(&start_filter_);
   cudaEventCreate(&end_filter_);
-
-  // preallocate for output disparity float buffer and points3D Mat:
-  disparity_out_buffer_.resize(target_input_height * target_input_width);
-  confidence_out_buffer_.resize(target_input_height * target_input_width);
-  occlusion_out_buffer_.resize(target_input_height * target_input_width);
 
   // Publishers :
   points3d_pub_ =
@@ -126,28 +118,50 @@ S2M2Node::~S2M2Node() {
 void S2M2Node::startProcessing() {
   //------------------------ PAIR 1 -------------------------------
   auto start_pair1 = std::chrono::high_resolution_clock::now();
-  {
-    rectifyImages(image_760_, image_759_, STEREO_EXTRINSICS_1);
-    std::vector<cv::Mat> processed_pair =
-        preprocessInputs(left_image_rectified_, right_image_rectified_);
-    std::vector<cv::cuda::GpuMat> s2m2_outputs = runInference(processed_pair);
-    cv::cuda::GpuMat &disp_gpu = s2m2_outputs[0];
-    cv::cuda::GpuMat &occ_gpu = s2m2_outputs[1];
-    cv::cuda::GpuMat &conf_gpu = s2m2_outputs[2];
+  rectifyFullResolutionImages(image_760_, image_759_, STEREO_EXTRINSICS_1);
+  std::map patches_map_left = splitImageTo4Patches(left_image_rectified_);
+  std::map patches_map_right = splitImageTo4Patches(right_image_rectified_);
+  std::vector<cv::Mat> processed_pair_760_759;
+  std::vector<cv::cuda::GpuMat> s2m2_output_buffers; // disp, occ , conf
+  for (const auto &[name, roi] : patches_map_left) {
+    // Get the left and right image patches and verify sizes:
+    cv::Mat left_image_patch = left_image_rectified_(roi);
+    cv::Mat right_image_patch = right_image_rectified_(roi);
+    assert(left_image_patch.size() == right_image_patch.size());
+    assert(left_image_patch.cols == model_input_width_);
+    assert(left_image_patch.rows == model_input_height_);
 
-    TransformMatrix T_WC = generateTransformWC(STEREO_EXTRINSICS_1);
+    // Preprocess the pair of patches:
+    processed_pair_760_759 =
+        preprocessInputs(left_image_patch, right_image_patch);
+
+    // Run s2m2 disparity inference on the processed pair:
+    s2m2_output_buffers = runInference(processed_pair_760_759);
+
+    // Reproject disparity to 3D points:
+    int pixel_offset_x =
+        (name == "top_left" || name == "bottom_left") ? 0 : roi.width;
+    int pixel_offset_y =
+        (name == "top_left" || name == "top_right") ? 0 : roi.height;
+    cv::cuda::GpuMat &disp_gpu = s2m2_output_buffers[0];
     cv::Mat Qmatrix = rectifier_.getQMatrix();
     Qmatrix.convertTo(Qmatrix, CV_32FC1);
-
     cv::cuda::GpuMat points3d_homog_gpu =
-        runReprojectionTo3D(disp_gpu, Qmatrix);
+        runReprojectionTo3D(disp_gpu, Qmatrix, pixel_offset_x, pixel_offset_y);
+
+    // Transform points3d to world coordinate system:
     cv::cuda::GpuMat transformed_points3d_gpu =
-        runTransformationWC(points3d_homog_gpu, T_WC);
+        runTransformationWC(points3d_homog_gpu, STEREO_EXTRINSICS_1);
 
+    // Filter points3d based on confidence and occlusion:
+    cv::cuda::GpuMat &occlusion_gpu = s2m2_output_buffers[1];
+    cv::cuda::GpuMat confidence_gpu = s2m2_output_buffers[2];
     cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
-    filterPoints3D(transformed_points3d_gpu, conf_gpu, occ_gpu, cv_stream);
+    filterPoints3D(transformed_points3d_gpu, confidence_gpu, occlusion_gpu,
+                   cv_stream);
 
-    publishMessages(transformed_points3d_gpu, conf_gpu, occ_gpu);
+    // Publish the filtered points3d along with the (already made) left image:
+    publishMessages(transformed_points3d_gpu);
   }
   auto end_pair1 = std::chrono::high_resolution_clock::now();
   auto dur_ms_pair1 =
@@ -162,28 +176,40 @@ void S2M2Node::startProcessing() {
   }
   //------------------------ PAIR 2 -------------------------------
   auto start_pair2 = std::chrono::high_resolution_clock::now();
-  {
-    rectifyImages(image_761_, image_760_, STEREO_EXTRINSICS_2);
-    std::vector<cv::Mat> processed_pair =
-        preprocessInputs(left_image_rectified_, right_image_rectified_);
-    std::vector<cv::cuda::GpuMat> s2m2_outputs = runInference(processed_pair);
-    cv::cuda::GpuMat &disp_gpu = s2m2_outputs[0];
-    cv::cuda::GpuMat &occ_gpu = s2m2_outputs[1];
-    cv::cuda::GpuMat &conf_gpu = s2m2_outputs[2];
+  rectifyFullResolutionImages(image_761_, image_760_, STEREO_EXTRINSICS_2);
+  patches_map_left = splitImageTo4Patches(left_image_rectified_);
+  patches_map_right = splitImageTo4Patches(right_image_rectified_);
+  for (const auto &[name, roi] : patches_map_left) {
+    cv::Mat left_image_patch = left_image_rectified_(roi);
+    cv::Mat right_image_patch = right_image_rectified_(roi);
+    assert(left_image_patch.size() == right_image_patch.size());
+    assert(left_image_patch.cols == model_input_width_);
+    assert(left_image_patch.rows == model_input_height_);
 
-    TransformMatrix T_WC = generateTransformWC(STEREO_EXTRINSICS_2);
+    processed_pair_760_759 =
+        preprocessInputs(left_image_patch, right_image_patch);
+    s2m2_output_buffers = runInference(processed_pair_760_759);
+
+    int pixel_offset_x =
+        (name == "top_left" || name == "bottom_left") ? 0 : roi.width;
+    int pixel_offset_y =
+        (name == "top_left" || name == "top_right") ? 0 : roi.height;
+    cv::cuda::GpuMat &disp_gpu = s2m2_output_buffers[0];
     cv::Mat Qmatrix = rectifier_.getQMatrix();
     Qmatrix.convertTo(Qmatrix, CV_32FC1);
-
     cv::cuda::GpuMat points3d_homog_gpu =
-        runReprojectionTo3D(disp_gpu, Qmatrix);
+        runReprojectionTo3D(disp_gpu, Qmatrix, pixel_offset_x, pixel_offset_y);
+
     cv::cuda::GpuMat transformed_points3d_gpu =
-        runTransformationWC(points3d_homog_gpu, T_WC);
+        runTransformationWC(points3d_homog_gpu, STEREO_EXTRINSICS_2);
 
+    cv::cuda::GpuMat &occlusion_gpu = s2m2_output_buffers[1];
+    cv::cuda::GpuMat confidence_gpu = s2m2_output_buffers[2];
     cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
-    filterPoints3D(transformed_points3d_gpu, conf_gpu, occ_gpu, cv_stream);
+    filterPoints3D(transformed_points3d_gpu, confidence_gpu, occlusion_gpu,
+                   cv_stream);
 
-    publishMessages(transformed_points3d_gpu, conf_gpu, occ_gpu);
+    publishMessages(transformed_points3d_gpu);
   }
   auto end_pair2 = std::chrono::high_resolution_clock::now();
   auto dur_ms_pair2 =
@@ -198,28 +224,40 @@ void S2M2Node::startProcessing() {
   }
   //------------------------ PAIR 3 -------------------------------
   auto start_pair3 = std::chrono::high_resolution_clock::now();
-  {
-    rectifyImages(image_762_, image_761_, STEREO_EXTRINSICS_3);
-    std::vector<cv::Mat> processed_pair =
-        preprocessInputs(left_image_rectified_, right_image_rectified_);
-    std::vector<cv::cuda::GpuMat> s2m2_outputs = runInference(processed_pair);
-    cv::cuda::GpuMat &disp_gpu = s2m2_outputs[0];
-    cv::cuda::GpuMat &occ_gpu = s2m2_outputs[1];
-    cv::cuda::GpuMat &conf_gpu = s2m2_outputs[2];
+  rectifyFullResolutionImages(image_762_, image_761_, STEREO_EXTRINSICS_3);
+  patches_map_left = splitImageTo4Patches(left_image_rectified_);
+  patches_map_right = splitImageTo4Patches(right_image_rectified_);
+  for (const auto &[name, roi] : patches_map_left) {
+    cv::Mat left_image_patch = left_image_rectified_(roi);
+    cv::Mat right_image_patch = right_image_rectified_(roi);
+    assert(left_image_patch.size() == right_image_patch.size());
+    assert(left_image_patch.cols == model_input_width_);
+    assert(left_image_patch.rows == model_input_height_);
 
-    TransformMatrix T_WC = generateTransformWC(STEREO_EXTRINSICS_3);
+    processed_pair_760_759 =
+        preprocessInputs(left_image_patch, right_image_patch);
+    s2m2_output_buffers = runInference(processed_pair_760_759);
+
+    int pixel_offset_x =
+        (name == "top_left" || name == "bottom_left") ? 0 : roi.width;
+    int pixel_offset_y =
+        (name == "top_left" || name == "top_right") ? 0 : roi.height;
+    cv::cuda::GpuMat &disp_gpu = s2m2_output_buffers[0];
     cv::Mat Qmatrix = rectifier_.getQMatrix();
     Qmatrix.convertTo(Qmatrix, CV_32FC1);
-
     cv::cuda::GpuMat points3d_homog_gpu =
-        runReprojectionTo3D(disp_gpu, Qmatrix);
+        runReprojectionTo3D(disp_gpu, Qmatrix, pixel_offset_x, pixel_offset_y);
+
     cv::cuda::GpuMat transformed_points3d_gpu =
-        runTransformationWC(points3d_homog_gpu, T_WC);
+        runTransformationWC(points3d_homog_gpu, STEREO_EXTRINSICS_3);
 
+    cv::cuda::GpuMat &occlusion_gpu = s2m2_output_buffers[1];
+    cv::cuda::GpuMat confidence_gpu = s2m2_output_buffers[2];
     cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
-    filterPoints3D(transformed_points3d_gpu, conf_gpu, occ_gpu, cv_stream);
+    filterPoints3D(transformed_points3d_gpu, confidence_gpu, occlusion_gpu,
+                   cv_stream);
 
-    publishMessages(transformed_points3d_gpu, conf_gpu, occ_gpu);
+    publishMessages(transformed_points3d_gpu);
   }
   auto end_pair3 = std::chrono::high_resolution_clock::now();
   auto dur_ms_pair3 =
@@ -235,50 +273,41 @@ void S2M2Node::startProcessing() {
 }
 
 void S2M2Node::loadCudaBuffers() {
+  // TensorRT 10.13.3 uses tensor names instead of binding indices :
+  // Get the names from the engine using int indices:
   const char *input_left_name = engine_->getIOTensorName(0);
   const char *input_right_name = engine_->getIOTensorName(1);
   const char *output_disp_name = engine_->getIOTensorName(2);
   const char *output_occ_name = engine_->getIOTensorName(3);
   const char *output_conf_name = engine_->getIOTensorName(4);
 
+  // Use the helper func getSizeFromBinding to get the size of the input
+  // tensors:
   size_t sizeInputLeft = getSizeFromBinding(engine_, input_left_name);
   size_t sizeInputRight = getSizeFromBinding(engine_, input_right_name);
   size_t sizeOutputDisp = getSizeFromBinding(engine_, output_disp_name);
   size_t sizeOutputOcc = getSizeFromBinding(engine_, output_occ_name);
   size_t sizeOutputConf = getSizeFromBinding(engine_, output_conf_name);
-
+  // And 2
+  // create the buffers -- cuda allocation happens on construction of the
+  // buffer
   buffers_.emplace_back(std::move(CudaBuffer(sizeInputLeft)));
   buffers_.emplace_back(std::move(CudaBuffer(sizeInputRight)));
   buffers_.emplace_back(std::move(CudaBuffer(sizeOutputDisp)));
   buffers_.emplace_back(std::move(CudaBuffer(sizeOutputOcc)));
   buffers_.emplace_back(std::move(CudaBuffer(sizeOutputConf)));
 
+  // Add a buffer for the points3D that will be produced with
+  // reprojectImageTo3D:
   size_t sizePoints3DHomog =
-      this->get_parameter("target_input_width").as_int() *
-      this->get_parameter("target_input_height").as_int() * HOMOGENEOUS_DIMS;
+      this->get_parameter("model_input_width").as_int() *
+      this->get_parameter("model_input_height").as_int() * HOMOGENEOUS_DIMS;
   buffers_.emplace_back(std::move(CudaBuffer(sizePoints3DHomog)));
 }
 
-void S2M2Node::rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
-                             const StereoExtrinsics &extrinsics) {
-  //=====================RESIZE===================================
-  auto start_resize = std::chrono::high_resolution_clock::now();
-  int scaled_width = static_cast<int>(left_image.cols * scale_factor_);
-  int scaled_height = static_cast<int>(left_image.rows * scale_factor_);
-  cv::Mat left_image_resized;
-  cv::Mat right_image_resized;
-  cv::resize(left_image, left_image_resized,
-             cv::Size(scaled_width, scaled_height), 0, 0, cv::INTER_LINEAR);
-  cv::resize(right_image, right_image_resized,
-             cv::Size(scaled_width, scaled_height), 0, 0, cv::INTER_LINEAR);
-  auto end_resize = std::chrono::high_resolution_clock::now();
-  auto dur_ms_resize =
-      std::chrono::duration<double, std::milli>(end_resize - start_resize)
-          .count();
-#if DEBUG_MODE
-  RCLCPP_INFO(this->get_logger(), "Resize duration: %.3f ms", dur_ms_resize);
-#endif
-
+void S2M2Node::rectifyFullResolutionImages(cv::Mat &left_image,
+                                           cv::Mat &right_image,
+                                           const StereoExtrinsics &extrinsics) {
   //=====================RECTIFICATION===============================
   auto start_rectify = std::chrono::high_resolution_clock::now();
   rectifier_.calculateMaps(extrinsics);
@@ -288,7 +317,8 @@ void S2M2Node::rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
               baseline);
 #endif
   auto start_rectify_left = std::chrono::high_resolution_clock::now();
-  left_image_rectified_ = rectifier_.rectifyLeft(left_image_resized);
+  left_image_rectified_ = rectifier_.rectifyLeft(left_image);
+
   auto end_rectify_left = std::chrono::high_resolution_clock::now();
   auto dur_ms_rectify_left = std::chrono::duration<double, std::milli>(
                                  end_rectify_left - start_rectify_left)
@@ -297,9 +327,12 @@ void S2M2Node::rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
   RCLCPP_INFO(this->get_logger(), "Rectification left duration: %.3f ms",
               dur_ms_rectify_left);
 #endif
-
+  if (profiler_writes_count_ < 50) {
+    profiler_file_ << "Rectification left duration: " << dur_ms_rectify_left
+                   << "ms" << std::endl;
+  }
   auto start_rectify_right = std::chrono::high_resolution_clock::now();
-  right_image_rectified_ = rectifier_.rectifyRight(right_image_resized);
+  right_image_rectified_ = rectifier_.rectifyRight(right_image);
   auto end_rectify_right = std::chrono::high_resolution_clock::now();
   auto dur_ms_right = std::chrono::duration<double, std::milli>(
                           end_rectify_right - start_rectify_right)
@@ -313,6 +346,12 @@ void S2M2Node::rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
   RCLCPP_INFO(this->get_logger(), "Rectification total duration: %.3f ms",
               dur_ms_total);
 #endif
+  if (profiler_writes_count_ < 50) {
+    profiler_file_ << "Rectification right duration: " << dur_ms_right << "ms"
+                   << std::endl;
+    profiler_file_ << "Rectification total duration: " << dur_ms_total << "ms"
+                   << std::endl;
+  }
   if (this->get_parameter("save_rectified_images").as_bool()) {
     saveRectifiedImages(
         left_image_rectified_, right_image_rectified_,
@@ -323,21 +362,22 @@ void S2M2Node::rectifyImages(cv::Mat &left_image, cv::Mat &right_image,
   }
 }
 
-std::vector<cv::Mat>
-S2M2Node::preprocessInputs(cv::Mat &left_rectified, cv::Mat &right_rectified) {
+std::vector<cv::Mat> S2M2Node::preprocessInputs(cv::Mat &left_image,
+                                                cv::Mat &right_image) {
   cv::Mat left_image_processed;
   cv::Mat right_image_processed;
   //=====================PADDING===================================
   auto start_pad = std::chrono::high_resolution_clock::now();
-  new_height_ = static_cast<int>(
-      ceil(static_cast<float>(left_rectified.rows) / 32.0) * 32);
-  new_width_ = static_cast<int>(
-      ceil(static_cast<float>(left_rectified.cols) / 32.0) * 32);
-  int pad_bottom = new_height_ - left_rectified.rows;
-  int pad_right = new_width_ - left_rectified.cols;
-  cv::copyMakeBorder(left_rectified, left_image_processed, 0, pad_bottom, 0,
+  // padding to multiples of 32 for the model :
+  new_height_ =
+      static_cast<int>(ceil(static_cast<float>(left_image.rows) / 32.0) * 32);
+  new_width_ =
+      static_cast<int>(ceil(static_cast<float>(left_image.cols) / 32.0) * 32);
+  int pad_bottom = new_height_ - left_image.rows;
+  int pad_right = new_width_ - left_image.cols;
+  cv::copyMakeBorder(left_image, left_image_processed, 0, pad_bottom, 0,
                      pad_right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
-  cv::copyMakeBorder(right_rectified, right_image_processed, 0, pad_bottom, 0,
+  cv::copyMakeBorder(right_image, right_image_processed, 0, pad_bottom, 0,
                      pad_right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
   auto end_pad = std::chrono::high_resolution_clock::now();
   auto dur_ms_pad =
@@ -345,8 +385,10 @@ S2M2Node::preprocessInputs(cv::Mat &left_rectified, cv::Mat &right_rectified) {
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "Padding duration: %.3f ms", dur_ms_pad);
 #endif
-
-  // Create processed left image ROS2 msg before making it NCHW:
+  if (profiler_writes_count_ < 50) {
+    profiler_file_ << "Padding duration: " << dur_ms_pad << "ms" << std::endl;
+  }
+  // Create processed left image ROS2 msg befoe making it NCHW:
   cv_bridge::CvImage cv_image(left_image_msg_.header, "rgb8",
                               left_image_processed);
   cv_image.toImageMsg(left_image_msg_);
@@ -361,6 +403,10 @@ S2M2Node::preprocessInputs(cv::Mat &left_rectified, cv::Mat &right_rectified) {
   RCLCPP_INFO(this->get_logger(), "NCHW conversion duration: %.3f ms",
               dur_ms_nchw);
 #endif
+  if (profiler_writes_count_ < 50) {
+    profiler_file_ << "NCHW conversion duration: " << dur_ms_nchw << "ms"
+                   << std::endl;
+  }
   return {left_image_processed, right_image_processed};
 }
 
@@ -372,10 +418,12 @@ void S2M2Node::convertToNCHW(cv::Mat &image) {
 
 TransformMatrix
 S2M2Node::generateTransformWC(const StereoExtrinsics &extrinsics) {
+
   TransformMatrix T_WC;
   cv::Mat R_final_WC;
   cv::Mat t_final_WC;
 
+  // We first get the extrinsics from pix4d of the unrectified left camera:
   cv::Mat R_CW;
   cv::Mat t_CW;
   extrinsics.R_left.convertTo(R_CW, CV_32FC1);
@@ -383,30 +431,38 @@ S2M2Node::generateTransformWC(const StereoExtrinsics &extrinsics) {
   cv::Mat R_WC_unrectified = R_CW.t();
   cv::Mat t_WC_unrectified = -R_WC_unrectified * t_CW;
 
+  // We get also the rectified left camera extrinsics, and reverse them:
   cv::Mat R_left_rectified = rectifier_.getR1_rectified();
   R_left_rectified.convertTo(R_left_rectified, CV_32FC1);
   cv::Mat R_left_rectified_inv = R_left_rectified.t();
 
+  // The final transform is the product of the two:
   R_final_WC = R_WC_unrectified * R_left_rectified_inv;
-  t_final_WC = t_WC_unrectified;
+  t_final_WC = t_WC_unrectified; // rectifier does not translate
 
+  // row major order of each float:
+  // [R|t] 4x4 matrix in row major order
+  // row 1:
   T_WC.data[0] = R_final_WC.at<float>(0, 0);
   T_WC.data[1] = R_final_WC.at<float>(0, 1);
   T_WC.data[2] = R_final_WC.at<float>(0, 2);
   T_WC.data[3] = t_final_WC.at<float>(0, 0);
+  // row 2:
   T_WC.data[4] = R_final_WC.at<float>(1, 0);
   T_WC.data[5] = R_final_WC.at<float>(1, 1);
   T_WC.data[6] = R_final_WC.at<float>(1, 2);
   T_WC.data[7] = t_final_WC.at<float>(1, 0);
+  // row 3:
   T_WC.data[8] = R_final_WC.at<float>(2, 0);
   T_WC.data[9] = R_final_WC.at<float>(2, 1);
   T_WC.data[10] = R_final_WC.at<float>(2, 2);
   T_WC.data[11] = t_final_WC.at<float>(2, 0);
+  // row 4(homogeneous):
   T_WC.data[12] = 0.0f;
   T_WC.data[13] = 0.0f;
   T_WC.data[14] = 0.0f;
   T_WC.data[15] = 1.0f;
-
+  // print the R,t matrices individually:
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "R_WC final: \n");
   for (int i = 0; i < 3; i++) {
@@ -424,6 +480,8 @@ S2M2Node::generateTransformWC(const StereoExtrinsics &extrinsics) {
 
 std::vector<cv::cuda::GpuMat>
 S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
+  // We verify that the images have the same size as the allocated cuda
+  // buffers:
   cv::Mat left_image = processed_pair[0];
   cv::Mat right_image = processed_pair[1];
   size_t left_img_bytes = left_image.total() * left_image.elemSize();
@@ -447,6 +505,7 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
   RCLCPP_INFO(this->get_logger(), "---Size checks passed---");
   RCLCPP_INFO(this->get_logger(), "Copying images to cuda buffers...");
 #endif
+  // Copy the images to the cuda buffers:
   cudaMemcpy(buffers_.at(0).data(), left_image.data, left_img_bytes,
              cudaMemcpyHostToDevice);
   cudaMemcpy(buffers_.at(1).data(), right_image.data, right_img_bytes,
@@ -454,6 +513,7 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "Setting tensor addresses...");
 #endif
+  // Run inference, by passing the tensors to the model :
   context_->setTensorAddress("input_left", buffers_.at(0).data());
   context_->setTensorAddress("input_right", buffers_.at(1).data());
   context_->setTensorAddress("output_disp", buffers_.at(2).data());
@@ -462,10 +522,10 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "Running inference...");
 #endif
+  // Start inference timer:
   cudaEventRecord(start_inference_, stream_);
   context_->enqueueV3(stream_);
   cudaEventRecord(end_inference_, stream_);
-
   cv::cuda::GpuMat disp_gpu(new_height_, new_width_, CV_32FC1,
                             buffers_.at(2).data());
   cv::cuda::GpuMat occlusion_out_buffer_gpu(new_height_, new_width_, CV_32FC1,
@@ -486,12 +546,14 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
 }
 
 cv::cuda::GpuMat S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp,
-                                                cv::Mat &Qmatrix) {
+                                               cv::Mat &Qmatrix,
+                                               const int patch_offset_x,
+                                               const int patch_offset_y) {
   cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
   cudaEventRecord(start_reproject_, stream_);
   cv::cuda::GpuMat points3d_homog_gpu(new_height_, new_width_, CV_32FC4);
-  cv::cuda::reprojectImageTo3D(disp, points3d_homog_gpu, Qmatrix,
-                               HOMOGENEOUS_DIMS, cv_stream);
+  launchReprojectionCustomKernel(disp, points3d_homog_gpu, Qmatrix.ptr<float>(),
+                                 patch_offset_x, patch_offset_y, stream_);
   cudaEventRecord(end_reproject_, stream_);
   cudaStreamSynchronize(stream_);
   float elapsed_reproject_ms;
@@ -507,7 +569,8 @@ cv::cuda::GpuMat S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp,
 
 cv::cuda::GpuMat
 S2M2Node::runTransformationWC(cv::cuda::GpuMat &points3d_homog_gpu,
-                              const TransformMatrix &T_WC) {
+                              const StereoExtrinsics &extrinsics) {
+  TransformMatrix T_WC = generateTransformWC(extrinsics);
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "The T matrix is: \n");
   for (int i = 0; i < 16; i++) {
@@ -540,18 +603,22 @@ void S2M2Node::filterPoints3D(cv::cuda::GpuMat &points3d,
                               cv::cuda::GpuMat &occlusion,
                               cv::cuda::Stream &stream) {
   cudaEventRecord(start_filter_, stream_);
+  // Filter points3d based on confidence and occlusion:
   cv::cuda::GpuMat occ_mask, conf_mask, valid_mask;
   cv::cuda::GpuMat invalid_mask;
 
+  // create the masks:
   cv::cuda::compare(confidence, cv::Scalar(confidence_threshold_), conf_mask,
                     cv::CMP_GT, stream);
   cv::cuda::compare(occlusion, cv::Scalar(occlusion_threshold_), occ_mask,
                     cv::CMP_GT, stream);
 
+  // combine masks:
   cv::cuda::bitwise_and(conf_mask, occ_mask, valid_mask, cv::noArray(), stream);
   cv::cuda::bitwise_not(valid_mask, invalid_mask, cv::noArray(), stream);
 
-  points3d.setTo(0, invalid_mask, stream);
+  // filter points3d:
+  points3d.setTo(0, invalid_mask, stream); // Set invalid points to 0(!)
   cudaEventRecord(end_filter_, stream_);
   cudaStreamSynchronize(stream_);
   float elapsed_filter_ms;
@@ -565,23 +632,12 @@ void S2M2Node::filterPoints3D(cv::cuda::GpuMat &points3d,
 }
 
 void S2M2Node::publishMessages(
-    const cv::cuda::GpuMat &transformed_points3d,
-    const cv::cuda::GpuMat &confidence, const cv::cuda::GpuMat &occlusion) {
+    const cv::cuda::GpuMat &points3d_transformed_homog_gpu) {
   cv::cuda::Stream cv_stream = cv::cuda::StreamAccessor::wrapStream(stream_);
-  //  Synchronize before copying:
-  cudaStreamSynchronize(stream_);
-  // Copy the output buffers to the host:
-  CUDA_CHECK(cudaMemcpy(disparity_out_buffer_.data(), buffers_.at(2).data(),
-                        buffers_.at(2).size(), cudaMemcpyDeviceToHost));
-  CUDA_CHECK(cudaMemcpy(occlusion_out_buffer_.data(), buffers_.at(3).data(),
-                        buffers_.at(3).size(), cudaMemcpyDeviceToHost));
-  CUDA_CHECK(cudaMemcpy(confidence_out_buffer_.data(), buffers_.at(4).data(),
-                        buffers_.at(4).size(), cudaMemcpyDeviceToHost));
-
   auto start_download_and_publish = std::chrono::high_resolution_clock::now();
   //  Download the 3D points from GPU to CPU :
   cv::Mat points3d_homog;
-  transformed_points3d.download(points3d_homog, cv_stream);
+  points3d_transformed_homog_gpu.download(points3d_homog, cv_stream);
   cudaStreamSynchronize(stream_);
   // convert points3d to ROS message:
   sensor_msgs::msg::Image points3d_msg;
@@ -601,29 +657,27 @@ void S2M2Node::publishMessages(
       std::chrono::duration<double, std::milli>(end_download_and_publish -
                                                 start_download_and_publish)
           .count();
-  // if (profiler_writes_count_ < 50) {
-  //   profiler_file_ << "Download and publish duration: "
-  //                  << dur_ms_download_and_publish << "ms" << std::endl;
-  // }
-  if (this->get_parameter("save_disparity").as_bool() &&
-      disp_save_counter_ < 10) {
-    cv::Mat disparity_cv(new_height_, new_width_, CV_32FC1,
-                         disparity_out_buffer_.data());
-    cv::Mat occlusion_cv(new_height_, new_width_, CV_32FC1,
-                         occlusion_out_buffer_.data());
-    cv::Mat confidence_cv(new_height_, new_width_, CV_32FC1,
-                          confidence_out_buffer_.data());
-    saveDisparityToPng(disparity_cv, occlusion_cv, confidence_cv,
-                       profiler_dirpath_ + "disparity_" +
-                           std::to_string(disp_save_counter_) + ".png");
-    disp_save_counter_++;
-  }
-  if (this->get_parameter("visualize_disparity").as_bool()) {
-    cv::Mat disparity_map = cv::Mat(new_height_, new_width_, CV_32FC1,
-                                    disparity_out_buffer_.data());
-    visualize_output_disparity(new_height_, new_width_, disparity_map,
-                               confidence_out_buffer_, occlusion_out_buffer_);
-  }
+#if DEBUG_MODE
+  RCLCPP_INFO(this->get_logger(), "Download and publish duration: %.3f ms",
+              dur_ms_download_and_publish);
+#endif
+  profiler_file_ << "Download and publish duration: "
+                 << dur_ms_download_and_publish << "ms" << std::endl;
+}
+
+std::map<std::string, cv::Rect>
+S2M2Node::splitImageTo4Patches(cv::Mat &original_img) {
+  int mid_x = original_img.cols / 2;
+  int mid_y = original_img.rows / 2;
+  int width = original_img.cols;
+  int height = original_img.rows;
+  std::map<std::string, cv::Rect> patches_map;
+  patches_map["top_left"] = cv::Rect(0, 0, mid_x, mid_y);
+  patches_map["top_right"] = cv::Rect(mid_x, 0, width - mid_x, mid_y);
+  patches_map["bottom_left"] = cv::Rect(0, mid_y, mid_x, height - mid_y);
+  patches_map["bottom_right"] =
+      cv::Rect(mid_x, mid_y, width - mid_x, height - mid_y);
+  return patches_map;
 }
 
 int main(int argc, char **argv) {

@@ -1,7 +1,0 @@
-dsm_node:
-  ros__parameters:
-    depthmaps_per_dsm: 3
-    points3d_topic_name: "/stereo/points3d"
-    save_dsm: true
-    dsm_step_X: 0.2
-    dsm_step_Y: 0.2

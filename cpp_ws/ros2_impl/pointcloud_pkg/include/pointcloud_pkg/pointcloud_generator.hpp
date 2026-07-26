@@ -42,7 +42,7 @@ private:
   int profiler_writes_count_ = 0;
   int map_counter_ = 0;
   int generation_counter_ = 0;
-  const size_t DEPTHMAPS_NUM = 3;
+  const size_t DEPTHMAPS_NUM = 12; // 3 depthmaps * 4 patches each one
   std::vector<sensor_msgs::msg::Image::ConstSharedPtr> depthmap_msg_buffer_;
   std::vector<sensor_msgs::msg::Image::ConstSharedPtr> left_image_msg_buffer_;
 

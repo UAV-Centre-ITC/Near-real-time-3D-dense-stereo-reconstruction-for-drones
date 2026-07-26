@@ -25,6 +25,54 @@ __global__ void transformPoint3D(TransformMatrix T,
   }
 }
 
+__constant__ float cq[16]; // Q matrix in constant memory
+
+__global__ void reprojectTo3DCustomKernel(const cv::cuda::PtrStepSz<float> disp,
+                                          cv::cuda::PtrStepSz<float4> points3d,
+                                          const int offset_x,
+                                          const int offset_y) {
+  const int local_x = blockIdx.x * blockDim.x + threadIdx.x;
+  const int local_y = blockIdx.y * blockDim.y + threadIdx.y;
+
+  const int global_x = local_x + offset_x;
+  const int global_y = local_y + offset_y;
+
+  if (local_y >= disp.rows || local_x >= disp.cols)
+    return;
+
+  const float qx = global_x * cq[0] + global_y * cq[1] + cq[3];
+  const float qy = global_x * cq[4] + global_y * cq[5] + cq[7];
+  const float qz = global_x * cq[8] + global_y * cq[9] + cq[11];
+  const float qw = global_x * cq[12] + global_y * cq[13] + cq[15];
+
+  // now request the disparity from global memory and create the final xyz
+  // point:
+  const float d = disp(local_y, local_x);
+  const float iW = 1.f / (qw + cq[14] * d);
+
+  float4 vec;
+  vec = {(qx + cq[2] * d) * iW, (qy + cq[6] * d) * iW, (qz + cq[10] * d) * iW,
+         1.f};
+
+  points3d(local_y, local_x) = vec;
+}
+
+void launchReprojectionCustomKernel(const cv::cuda::PtrStepSz<float> disp,
+                                    cv::cuda::PtrStepSz<float4> points3d,
+                                    const float *Q, const int offset_x,
+                                    const int offset_y, cudaStream_t stream) {
+  // offset parameter refers to the pixel offset of the patch we are processing.
+  dim3 blockDim(16, 16);
+  dim3 grid((disp.cols + blockDim.x - 1) / blockDim.x,
+            (disp.rows + blockDim.y - 1) / blockDim.y);
+  CUDA_CHECK(
+      cudaMemcpyToSymbol(cq, Q, sizeof(float) * 16)); // copy Q to constant
+                                                      //
+  reprojectTo3DCustomKernel<<<grid, blockDim, 0, stream>>>(disp, points3d,
+                                                           offset_x, offset_y);
+  CUDA_CHECK(cudaGetLastError());
+}
+
 void launchTransformKernel(TransformMatrix T,
                            cv::cuda::PtrStepSz<float4> src_depthmap,
                            cv::cuda::PtrStepSz<float4> dst_depthmap, int rows,
