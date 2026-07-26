@@ -3,7 +3,6 @@
 
 # Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dsm
 
-![DSM](figures_for_readme/dsm.png)
 
 - [Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dsm](#near-real-time-3d-stereo-reconstruction-from-drone-imagery-and-slam-pose-estimations---branch--dsm)
   - [DSM example](#dsm-example)
