@@ -447,10 +447,10 @@ S2M2Node::runInference(std::vector<cv::Mat> &processed_pair) {
   RCLCPP_INFO(this->get_logger(), "---Size checks passed---");
   RCLCPP_INFO(this->get_logger(), "Copying images to cuda buffers...");
 #endif
-  cudaMemcpyAsync(buffers_.at(0).data(), left_image.data, left_img_bytes,
-                  cudaMemcpyHostToDevice, stream_);
-  cudaMemcpyAsync(buffers_.at(1).data(), right_image.data, right_img_bytes,
-                  cudaMemcpyHostToDevice, stream_);
+  cudaMemcpy(buffers_.at(0).data(), left_image.data, left_img_bytes,
+             cudaMemcpyHostToDevice);
+  cudaMemcpy(buffers_.at(1).data(), right_image.data, right_img_bytes,
+             cudaMemcpyHostToDevice);
 #if DEBUG_MODE
   RCLCPP_INFO(this->get_logger(), "Setting tensor addresses...");
 #endif
@@ -571,12 +571,12 @@ void S2M2Node::publishMessages(
   //  Synchronize before copying:
   cudaStreamSynchronize(stream_);
   // Copy the output buffers to the host:
-  CUDA_CHECK(cudaMemcpyAsync(disparity_out_buffer_.data(), buffers_.at(2).data(),
-                             buffers_.at(2).size(), cudaMemcpyDeviceToHost, stream_));
-  CUDA_CHECK(cudaMemcpyAsync(occlusion_out_buffer_.data(), buffers_.at(3).data(),
-                             buffers_.at(3).size(), cudaMemcpyDeviceToHost, stream_));
-  CUDA_CHECK(cudaMemcpyAsync(confidence_out_buffer_.data(), buffers_.at(4).data(),
-                             buffers_.at(4).size(), cudaMemcpyDeviceToHost, stream_));
+  CUDA_CHECK(cudaMemcpy(disparity_out_buffer_.data(), buffers_.at(2).data(),
+                        buffers_.at(2).size(), cudaMemcpyDeviceToHost));
+  CUDA_CHECK(cudaMemcpy(occlusion_out_buffer_.data(), buffers_.at(3).data(),
+                        buffers_.at(3).size(), cudaMemcpyDeviceToHost));
+  CUDA_CHECK(cudaMemcpy(confidence_out_buffer_.data(), buffers_.at(4).data(),
+                        buffers_.at(4).size(), cudaMemcpyDeviceToHost));
 
   auto start_download_and_publish = std::chrono::high_resolution_clock::now();
   //  Download the 3D points from GPU to CPU :
@@ -601,6 +601,10 @@ void S2M2Node::publishMessages(
       std::chrono::duration<double, std::milli>(end_download_and_publish -
                                                 start_download_and_publish)
           .count();
+  // if (profiler_writes_count_ < 50) {
+  //   profiler_file_ << "Download and publish duration: "
+  //                  << dur_ms_download_and_publish << "ms" << std::endl;
+  // }
   if (this->get_parameter("save_disparity").as_bool() &&
       disp_save_counter_ < 10) {
     cv::Mat disparity_cv(new_height_, new_width_, CV_32FC1,

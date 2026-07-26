@@ -108,7 +108,7 @@ public:
    *        frame to the world coordinate frame using the provided
    *        transformation matrix.
    * @param points3d_homog_gpu Homogeneous 3D points in camera frame.
-   * @param T_WC               4x4 transformation matrix (camera->world).
+   * @param T_WC               4x4 transformation matrix (camera→world).
    * @return GPU Mat containing the transformed 3D points (CV_32FC4).
    */
   [[nodiscard]] cv::cuda::GpuMat
@@ -121,7 +121,7 @@ public:
    *        The transform combines the inverse of the rectification rotation
    *        with the inverse of the camera-to-world extrinsic rotation.
    * @param extrinsics Extrinsic parameters of the left camera.
-   * @return The homogeneous 4x4 transformation matrix (camera->world).
+   * @return The homogeneous 4x4 transformation matrix (camera→world).
    */
   [[nodiscard]] TransformMatrix
   generateTransformWC(const StereoExtrinsics &extrinsics);

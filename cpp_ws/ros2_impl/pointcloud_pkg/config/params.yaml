@@ -5,4 +5,4 @@ pointcloud_generator:
     depthmap_height: 1728
     time_profiling_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/pointcloud_pkg/assets/"
     use_sim_time: false
-    save_pcl: false 
+    save_pcl: true 

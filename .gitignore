@@ -7,6 +7,7 @@ weights/
 .cache
 *.pth
 *.pyc 
+dsm.*
 #doxygen files: 
 html/
 latex/
@@ -24,6 +25,7 @@ testfiles_rectification/
 *.d
 #images: 
 *.png
+!figures_for_readme/*.png
 *.jpg
 *.jpeg
 *.JPG

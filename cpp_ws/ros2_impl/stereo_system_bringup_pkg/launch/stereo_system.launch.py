@@ -20,13 +20,14 @@ def generate_launch_description():
     launch_actions.append(gdb_debug_arg_s2m2)
     gdb_debug_conf_s2m2 = LaunchConfiguration("gdb_debug_s2m2_node")
 
-    gdb_debug_arg_pointcloud_node = DeclareLaunchArgument(
-        "gdb_debug_pointcloud_node",
+    gdb_debug_arg_dsm_node = DeclareLaunchArgument(
+        "gdb_debug_dsm_node",
         default_value="false",
         description="Launch the pointcloud node in gdb debug mode",
     )
-    launch_actions.append(gdb_debug_arg_pointcloud_node)
-    gdb_debug_conf_pointcloud_node = LaunchConfiguration("gdb_debug_pointcloud_node")
+    launch_actions.append(gdb_debug_arg_dsm_node)
+
+    gdb_debug_conf_dsm_node = LaunchConfiguration("gdb_debug_dsm_node")
     # <----- arguments for optional gdb debugging of nodes
 
     # S2M2 stereo inference node
@@ -39,28 +40,15 @@ def generate_launch_description():
     )
     launch_actions.append(s2m2_inference_launch)
 
-    # Pointcloud generator node
-    pointcloud_pkg_dir = get_package_share_directory("pointcloud_pkg")
-    pointcloud_generator_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pointcloud_pkg_dir, "launch", "pointcloud_generator.launch.py")
-        ),
-        launch_arguments={"gdb_debug": gdb_debug_conf_pointcloud_node}.items(),
-    )
-    launch_actions.append(pointcloud_generator_launch)
+    # DSM generator node :
 
-    # GPU monitoring node
-    gpu_monitoring_node = Node(
-        package="gpu_monitoring_pkg",
-        executable="gpu_monitoring_node",
-        name="gpu_monitoring_node",
-        output="screen",
-        # prefix="xterm -e gdb --args",
-        parameters=[
-            {"poll_frequency_hz": 20},
-            {"window_averaging_size": 200},
-        ],
+    dsm_generator_pkg_dir = get_package_share_directory("dsm_generator_pkg")
+    dsm_generator_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(dsm_generator_pkg_dir, "launch", "dsm_generator.launch.py")
+        ),
+        launch_arguments={"gdb_debug": gdb_debug_conf_dsm_node}.items(),
     )
-    launch_actions.append(gpu_monitoring_node)
+    launch_actions.append(dsm_generator_launch)
 
     return LaunchDescription(launch_actions)

@@ -1,34 +1,34 @@
 
 
 
-# Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : uav2_impl
+# Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dsm
 
-- [Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : uav2\_impl](#near-real-time-3d-stereo-reconstruction-from-drone-imagery-and-slam-pose-estimations---branch--uav2_impl)
+![DSM](figures_for_readme\dsm.png)
+
+- [Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dsm](#near-real-time-3d-stereo-reconstruction-from-drone-imagery-and-slam-pose-estimations---branch--dsm)
+  - [DSM example](#dsm-example)
   - [Code preparation](#code-preparation)
-  - [Acknowledgements](#acknowledgements)
   - [Contact](#contact)
 
+On this branch, I generate a Digital Surface Model instead of dense point clouds. The s2m2 inference node works
+identically to the uav2_samples and full_resolution_uav branches, where image samples from M13_2018 dataset are used. 
 
-**EXPERIMENTAL BRANCH**: 
+DSMs are much lighter often contain sufficient information for inspecting an area. 
 
-This branch uses a 4 image samples from the M13_2018 aerial dataset to test the stereo pipeline. It is identical to the *full_resolution_uav* branch, apart from image resizing. This branch does not split the image to 4 equal patches. It uses a scale factor parameter and resizes the images **before** the rectification step. Camera intrinsics are also scaled acoordingly to produce proper rectification results. 
+The newy added node is within *dsm_generator_pkg*, and inside the config folder one can define the steps for X,Y and how many depthmaps will be combined within one DSM. 
+
+![overview](figures_for_readme/dsm_branch_descr.png)
+
+Since this package was based on sample images from M13_2018 dataset, the node sitches a few depthmaps into one DSM and stops. This node can also replace the *pointcloud_generator* node on the main branch(ros2_impl). 
+
+## DSM example 
+
+![overview](figures_for_readme/dsm.png)
 
 ## Code preparation 
 
 **Identical to the other sample-based branches**. See *full_resolution_uav* on how to export the TensorRT engine file of S2M2, build OpenCV 4.13 with cuda modules enabled, and how to build and launch the nodes. 
 
-
-## Acknowledgements
-
-This project uses the S2M2 model(Junhong Min et al.). I would like to thank them for their work and for providing this open-source model. 
-``` bibtex
-@inproceedings{min2025s2m2,
-  title={{S\textsuperscript{2}M\textsuperscript{2}}: Scalable Stereo Matching Model for Reliable Depth Estimation},
-  author={Junhong Min and Youngpil Jeon and Jimin Kim and Minyong Choi},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
-  year={2025}
-}
-```
 
 ## Contact
 
