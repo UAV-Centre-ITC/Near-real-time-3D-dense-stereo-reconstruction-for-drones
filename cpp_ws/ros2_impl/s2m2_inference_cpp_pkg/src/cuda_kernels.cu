@@ -1,7 +1,6 @@
 #include <cuda_runtime_api.h>
 #include <opencv2/core/cuda.hpp>
 #include <s2m2_inference_cpp_pkg/cuda_kernels.h>
-#include <stdio.h>
 
 __global__ void transformPoint3D(TransformMatrix T,
                                  cv::cuda::PtrStepSz<float4> src_depthmap,
@@ -27,10 +26,10 @@ __global__ void transformPoint3D(TransformMatrix T,
 
 __constant__ float cq[16]; // Q matrix in constant memory
 
-__global__ void reprojectTo3DCustomKernel(const cv::cuda::PtrStepSz<float> disp,
-                                          cv::cuda::PtrStepSz<float4> points3d,
-                                          const int offset_x,
-                                          const int offset_y) {
+__global__ void reprojectTo3DWithOffset(const cv::cuda::PtrStepSz<float> disp,
+                                        cv::cuda::PtrStepSz<float4> points3d,
+                                        const int offset_x,
+                                        const int offset_y) {
   const int local_x = blockIdx.x * blockDim.x + threadIdx.x;
   const int local_y = blockIdx.y * blockDim.y + threadIdx.y;
 
@@ -65,11 +64,11 @@ void launchReprojectionCustomKernel(const cv::cuda::PtrStepSz<float> disp,
   dim3 blockDim(16, 16);
   dim3 grid((disp.cols + blockDim.x - 1) / blockDim.x,
             (disp.rows + blockDim.y - 1) / blockDim.y);
-  CUDA_CHECK(
-      cudaMemcpyToSymbol(cq, Q, sizeof(float) * 16)); // copy Q to constant
-                                                      //
-  reprojectTo3DCustomKernel<<<grid, blockDim, 0, stream>>>(disp, points3d,
-                                                           offset_x, offset_y);
+  CUDA_CHECK(cudaMemcpyToSymbolAsync(cq, Q, sizeof(float) * 16, 0,
+                                     cudaMemcpyHostToDevice,
+                                     stream)); // copy Q to constant mem
+  reprojectTo3DWithOffset<<<grid, blockDim, 0, stream>>>(disp, points3d,
+                                                         offset_x, offset_y);
   CUDA_CHECK(cudaGetLastError());
 }
 

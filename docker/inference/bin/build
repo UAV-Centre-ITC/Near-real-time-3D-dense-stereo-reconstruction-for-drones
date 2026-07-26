@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+source /opt/ros/humble/setup.bash
+cd /workspace/ros2_impl
+rm -rf build/ install/ log/
+echo "--- Step 1/2: building custom interfaces ---"
+colcon build --packages-select my_custom_interfaces
+source install/setup.bash
+echo "--- Step 2/2: building workspace ---"
+colcon build --symlink-install \
+    --packages-skip my_custom_interfaces \
+    --packages-ignore opencv_tests \
+    --cmake-args \
+    -DOpenCV_DIR=/opt/opencv_cuda/lib/cmake/opencv4 \
+    -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-13 \
+    -DCMAKE_CUDA_COMPILER=/usr/local/cuda-13/bin/nvcc
+source install/setup.bash

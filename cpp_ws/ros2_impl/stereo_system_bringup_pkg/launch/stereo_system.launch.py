@@ -50,7 +50,6 @@ def generate_launch_description():
     launch_actions.append(pointcloud_generator_launch)
 
     # GPU monitoring node
-    gpu_monitoring_pkg_dir = get_package_share_directory("gpu_monitoring_pkg")
     gpu_monitoring_node = Node(
         package="gpu_monitoring_pkg",
         executable="gpu_monitoring_node",
@@ -58,9 +57,9 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"poll_frequency_hz": 20},
-            {"window_averaging_size": 200},
+            {"window_averaging_size": 100},  # samples
         ],
-        # prefix="xterm -e gdb --args",
+        #        prefix="xterm -e gdb --args",
     )
     launch_actions.append(gpu_monitoring_node)
 

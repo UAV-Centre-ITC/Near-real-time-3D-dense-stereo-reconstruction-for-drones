@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+source /opt/ros/humble/setup.bash
+source /workspace/ros2_impl/install/setup.bash
+exec ros2 launch stereo_system_bringup_pkg stereo_system.launch.py "$@"

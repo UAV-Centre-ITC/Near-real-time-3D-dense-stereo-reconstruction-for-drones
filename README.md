@@ -1,136 +1,78 @@
-# Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : full_resolution_uav
+# Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dockerized_ros2impl
 
-**EXPERIMENTAL BRANCH**
-In this branch I used the M13_2018 aerial dataset and the generated poses from pix4dmapper, and produced point clouds from the full resolution images. 
+On this branch, the *ros2_impl* branch is containerized with docker. It was created for convenience in case future usage of the other branches fails due to different package versionings or updates on the machine, and for portability purposes. 
 
-The original images are split into 4 smaller parts, which makes the tensor dimensions smaller and total GPU memory usage lower. This comes at the cost of higher execution time.  
+**DISCLAIMER**: AI assistance was used to create all docker-related scripts, due to lack of knowledge and time for this software tool.  
 
-I used a few specific image samples, to test the pipeline without ros2 communication through image and pose topics. For that reason, poses and specific image paths are hardcoded based on the pix4d files, and will need to be adjusted for other samples.  
+## Architecture: Two-Container Design
 
+```
+┌──────────────────────────┐       shared volume       ┌──────────────────────────────┐
+│   s2m2-export            │   ────────────────────>   │   s2m2-inference             │
+│                          │   s2m2_models:/models     │                              │
+│  Python / Conda (CUDA 12)│   (.engine files)         │  C++ / ROS2 / colcon         │
+│  alg-S2M2/ source        │                           │  cpp_ws/ros2_impl/ source    │
+│                          │                           │                              │
+│  Builds .engine from     │                           │  Loads .engine at runtime    │
+│  PyTorch -> ONNX -> TRT  │                           │  Runs stereo pipeline        │
+└──────────────────────────┘                           └──────────────────────────────┘
+```
 
-Please read the "How to use this branch" for detailed setup information. 
-
-
+The first container is responsible for exporting the s2m2 model within the miniconda environment that the S2M2 authors use. Once the TensorRT model is succesfully exported, a different container is used to run the stereo vision pipeline, because in principle different packages are required there. 
 
 ## Table of contents
-- [Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : full\_resolution\_uav](#near-real-time-3d-stereo-reconstruction-from-drone-imagery-and-slam-pose-estimations---branch--full_resolution_uav)
+- [Near real-time 3D stereo reconstruction from drone imagery and SLAM pose estimations. - Branch : dockerized\_ros2impl](#near-real-time-3d-stereo-reconstruction-from-drone-imagery-and-slam-pose-estimations---branch--dockerized_ros2impl)
+  - [Architecture: Two-Container Design](#architecture-two-container-design)
   - [Table of contents](#table-of-contents)
   - [How to use this branch](#how-to-use-this-branch)
-    - [Dependencies](#dependencies)
-    - [Code preparation](#code-preparation)
-    - [Launch](#launch)
+    - [System Info](#system-info)
+    - [Running the docker containers](#running-the-docker-containers)
     - [Debug - GDB support](#debug---gdb-support)
-  - [GPU monitoring](#gpu-monitoring)
+    - [Keeping params in sync](#keeping-params-in-sync)
   - [Acknowledgements](#acknowledgements)
   - [Contact](#contact)
 
 
 ## How to use this branch
 
-### Dependencies
-System has been tested on linux772 server of ITC. In case of setup on different  machine, some dependencies might need to be setup again. However, the code could work with future versions of TensorRT as long as the .engine file can be exported.
+### System Info
+System has been tested on linux772 server of ITC. In case of setup on different  machine with different hardware, some dependencies might need to be adjusted within the dockerfiles. 
 
 System info : 
 - Ubuntu 22.04
 - Ros2 Humble
 - CUDA 13.0
-- TensorRT 10.13.3 found in https://developer.download.nvidia.com/compute/tensorrt/10.13.3/local_installers/nv-tensorrt-local-repo-ubuntu2204-10.13.3-cuda-13.0_1.0-1_amd64.deb
-- OpenCV 4.13 built from source with CUDA modules and contrib_modules enabled. 
-- vision_opencv packages built from workspace folder to link against opencv 4.13 instead of the default version of ros2 humble. 
+
+### Running the docker containers
+
+We will first use the *export* container to get the tensorRT engine file of the s2m2 model. From the thesis/ folder, run :  
 
 
----
-To install ROS2 Humble, follow the guide 
-provided on [Ros2 Humble debian packages](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debs.html)
+1. Place the S2M2 model weights within alg-S2M2/
+2. `bash docker/scripts/build_export.sh`
+3. Once the container is built, we run it with : `bash docker/scripts/run_export.sh` The image will persist after logging out of the server, so this script does not need to be run every time. 
+4. To enter the docker container from this point on, use `bash docker/scripts/enter_export.sh`
+5. This container will automatically run the necessary scripts to export both the ONNX and the TensorRT engine of the S2M2 model. 
 
----
-To build the OpenCV from source, run the following bash commands: 
+Then, we build and run the *inference* container that has the whole stereo vision pipeline similarily to the *ros2_impl* branch. 
+
+1. `bash docker/scripts/build_inference.sh`
+2. Once built, we run it once and it will persist, using `bash docker/scripts/run_inference.sh`
+3. To enter the container, run `bash docker/scripts/enter_inference.sh`
+4. From within the container, build and launch:
 ```
-wget -O opencv.zip https://github.com/opencv/opencv/archive/refs/tags/4.13.0.zip
-wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/refs/tags/4.13.0.zip
-unzip opencv.zip
-unzip opencv_contrib.zip
-cd opencv-4.13.0
-mkdir build && cd build
-
-cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/opt/opencv_cuda -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib-4.13.0/modules -DWITH_CUDA=ON -DWITH_CUDNN=ON -DWITH_CUBLAS=ON -DWITH_TBB=ON -DWITH_QT=ON -DWITH_OPENGL=ON -DOPENCV_DNN_CUDA=ON -DENABLE_FAST_MATH=ON -DCUDA_FAST_MATH=ON -DCUDA_ARCH_BIN=8.6 -DCUDA_ARCH_PTX=8.6 -DOPENCV_GENERATE_PKGCONFIG=ON -DOPENCV_ENABLE_NONFREE=ON -DBUILD_EXAMPLES=OFF ..
+build     # colcon build the workspace (all cmake/cuda flags are included)
+launch    # launch the full stereo pipeline
 ```
----
-To install NVIDIA's TensorRT: 
 
-- Visit https://developer.nvidia.com/tensorrt/download/10x 
-- Find and download the package named : TensorRT 10.13.3 GA for Ubuntu 22.04 and CUDA 13.0 DEB local repo Package  -  this should be the suitable for our sever and tested for the model of interest.
-- Next, follow the steps from https://docs.nvidia.com/deeplearning/tensorrt/latest/installing-tensorrt/installing.html#installing-debian 
-- sudo dpkg -i nv-tensorrt-local-repo-ubuntu2404-10.x.x-cuda-x.x_1.0-1_amd64.deb
-- sudo cp /var/nv-tensorrt-local-repo-ubuntu2404-10.x.x-cuda-x.x/*-keyring.gpg /usr/share/keyrings/
-- sudo apt-get update
-- sudo apt-get install tensorrt
-
-You might need to also specify the library path of CUDA for the dynamic linker using : 
-`export LD_LIBRARY_PATH=/usr/local/cuda-13.0/lib64:$LD_LIBRARY_PATH`
-
----
-### Code preparation
-
-
-1. `git clone https://github.com/Rektino/thesis.git`
-   
-2. Download the weights of the S model of s2m2 as provided in [S2M2 github](https://github.com/junhong-3dv/s2m2). 
-3. Run: 
-    ```
-    mkdir weights
-    mkdir weights/pretrain_weights
-    ```
-    and place the weights file there. 
-4. Set up the conda environment as described in [S2M2 github](https://github.com/junhong-3dv/s2m2), before exporting the model in the next steps. 
-   
-5. Export the s2m2 model in ONNX format: 
-Follow the guide on [S2M2 github](https://github.com/junhong-3dv/s2m2), but use the code within this repo under alg-S2M2 instead of cloning s2m2. That is because there were bugs on exporting that the authors have not yet fixed. I have thus changed slightly their export scripts. 
-
-6. Once ONNX file is exported, follow again the guide on [S2M2 github](https://github.com/junhong-3dv/s2m2) for the TensorRT exporting. Use -fp16 as precision and the image sizes accordingly. Once it's done, exit the conda environment.
-[**WARNING**] **Make sure to export the model with tenosr dimensions on multiples of 32. Based on the original image dimensions, a padding may occur in the images(included within the code), so take into account the final dimensions of the images before exporting the tensorRT engine.**
-   
-
-1. The sample images and weights are not included in the branch to save size. Therefore, select the 4 images from M13_2018 dataset that you want to test, and adjust the paths stated under:
- **ros2_impl/cpp_ws/s2m2_inference_cpp_pkg/config/params.yaml**
-You can use the 4 images I used (which produce 3 stereo pairs), for convenience of the next steps.
-1. Edit the camera paramteres obtained from pix4d(poses and intrinsics) within the file : **cpp_ws\ros2_impl\s2m2_inference_cpp_pkg\include\cam_params.hpp**
-2. Adjust further any desired parameters of the application on s2m2_inference_cpp_pkg/config/params.yaml and under pointcloud_pkg/config/params.yaml .
-3.  Build first the custom messages package and then the whole workspace with the custom build command provided as a shell script :
-  ```
-  cd cpp_ws/ros2_impl
-  colcon build --packages-select my_custom_interfaces
-  source install/setup.bash
-  bash updated_build_command.sh
-  source install/setup.bash
-  ```
-  Notice that some ros2 packages under vision_opencv are built from source, because their system-wide version that comes with ROS2 Humble does not have the Opencv 4.13 that we use here! So by overriding the system packages we escape dependency conflicts.
-
-1.  Run  `source install/setup.bash`  
-
-### Launch 
-
-We use a separate package for launching our nodes which is a common practice in ROS2:
-
-`ros2 launch stereo_system_bringup_pkg stereo_system_bringup.launch.py`
+The `build` and `launch` commands work from any shell inside the container (no need to source anything manually).
 
 
 ### Debug - GDB support 
 
-For debugging, gdb can be attached to a node, as an extra argument at launch time. 
-
-To install it : 
-```
-sudo apt update
-sudo apt install gdb libc6-dbg
-```
-
-I used xterm for the debugging terminal session. Example to activate debugging both s2m2 inference and the pointcloud node: 
+For debugging, gdb can be attached to a node, as an extra argument at launch time. I used xterm for the debugging terminal session. Example to activate debugging both s2m2 inference and the pointcloud node: 
 
 `ros2 launch stereo_system_bringup_pkg stereo_system_bringup.launch.py gdb_debug_s2m2_node:=true gdb_debug_pointcloud_node:=true`
-
-In order to make debugging easier, there are some print statements within the code that can be enabled with the following macro from s2m2_node.cpp : 
-`#define DEBUG_MODE true` . 
 
 Also, make sure to enable DEBUG build from 
 CMakeLists.txt : 
@@ -141,11 +83,17 @@ For best performance, switch back to release:
 
 `set(CMAKE_BUILD_TYPE Release)`
 
-## GPU monitoring 
 
-An extra experimental package named *gpu_monitoring_pkg* has been added. This package contains a node that can track how busy the GPU's PCI bus is, how much is the power consumption and the memory usage. It is not guaranteed to work as expected because there was insufficient time to test.  
+### Keeping params in sync
 
-The node queries at a specified frequency GPU stats using the *nvml* library, and publishes them on a ros2 topic with a custom message. 
+The native parameters live in `cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/config/params.yaml`. The Docker image uses a minimal override file at `docker/inference/config/params_docker.yaml` that contains only container-specific filesystem paths (`/models/`, `/data/`).
+
+**When you change any parameter in the native `params.yaml`** (e.g. model dimensions, thresholds, topic names), check whether the corresponding Docker override needs updating too:
+
+- Path parameters (`engine_filepath`, `time_profiling_dirpath`, `rectified_images_dirpath`) — update in `params_docker.yaml` if the model filename or output paths change.  
+- All other parameters (dimensions, thresholds, topic names) — already flow from the native file automatically; no Docker changes needed.
+
+If unsure, always verify with `ros2 param dump /s2m2_node` after a fresh build.
 
 ## Acknowledgements
 
@@ -163,7 +111,6 @@ This project uses the S2M2 model(Junhong Min et al.). I would like to thank them
 ## Contact
 
 If you have any questions regarding the code, please contact me at geoder.097@gmail.com.
-
 
 
 

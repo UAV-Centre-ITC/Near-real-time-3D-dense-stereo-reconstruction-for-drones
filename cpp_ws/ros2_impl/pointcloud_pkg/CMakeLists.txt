@@ -15,6 +15,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(my_custom_interfaces REQUIRED)
 find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(message_filters REQUIRED)
@@ -28,7 +29,7 @@ target_include_directories(pointcloud_generator PUBLIC
 target_compile_features(pointcloud_generator PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
 
-ament_target_dependencies(pointcloud_generator rclcpp sensor_msgs cv_bridge pcl_conversions message_filters)
+ament_target_dependencies(pointcloud_generator rclcpp sensor_msgs cv_bridge my_custom_interfaces pcl_conversions message_filters)
 
 target_link_libraries(pointcloud_generator 
 	${OpenCV_LIBS}

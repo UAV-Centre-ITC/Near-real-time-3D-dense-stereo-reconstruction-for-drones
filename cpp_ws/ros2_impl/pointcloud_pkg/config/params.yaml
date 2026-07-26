@@ -1,8 +1,7 @@
 pointcloud_generator:
   ros__parameters:
+    disparity_topic_name: 'stereo/disparity'
     pointcloud_topic_name: 'stereo/pointcloud'
-    depthmap_width: 2304
-    depthmap_height: 1728
     time_profiling_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/pointcloud_pkg/assets/"
-    use_sim_time: false
+    use_sim_time: true
     save_pcl: true 

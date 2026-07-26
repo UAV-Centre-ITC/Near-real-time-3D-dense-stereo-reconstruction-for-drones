@@ -1,0 +1,9 @@
+# Docker-specific path overrides. Loaded after the native params.yaml.
+# Only paths that differ between host filesystem and container are here.
+# All other parameters (model dims, thresholds, topic names) come from
+# the native s2m2_inference_cpp_pkg/config/params.yaml automatically.
+s2m2_node:
+  ros__parameters:
+    engine_filepath: "/models/S2M2_S_2464_2048_fp16.engine"
+    time_profiling_dirpath: "/data/profiling/"
+    rectified_images_dirpath: "/data/rectified/"
