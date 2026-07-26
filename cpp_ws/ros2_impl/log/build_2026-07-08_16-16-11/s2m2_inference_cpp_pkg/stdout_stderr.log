@@ -1,0 +1,14 @@
+-- The CXX compiler identification is GNU 13.3.0
+-- The CUDA compiler identification is unknown
+CMake Error at /usr/share/cmake-3.28/Modules/CMakeDetermineCUDACompiler.cmake:270 (message):
+  Failed to detect a default CUDA architecture.
+
+
+
+  Compiler output:
+
+Call Stack (most recent call first):
+  CMakeLists.txt:2 (project)
+
+
+-- Configuring incomplete, errors occurred!

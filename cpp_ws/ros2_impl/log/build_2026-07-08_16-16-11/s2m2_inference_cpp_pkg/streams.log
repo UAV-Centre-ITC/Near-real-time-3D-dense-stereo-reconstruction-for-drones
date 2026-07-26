@@ -1,0 +1,16 @@
+[0.020s] Invoking command in '/home/geo/thesis/cpp_ws/ros2_impl/build/s2m2_inference_cpp_pkg': AMENT_PREFIX_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces:/home/geo/ros2_ws/install/custom_benchmark_msgs:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /bin/cmake /home/geo/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg -DCMAKE_INSTALL_PREFIX=/home/geo/thesis/cpp_ws/ros2_impl/install/s2m2_inference_cpp_pkg
+[0.134s] -- The CXX compiler identification is GNU 13.3.0
+[0.240s] -- The CUDA compiler identification is unknown
+[0.242s] CMake Error at /usr/share/cmake-3.28/Modules/CMakeDetermineCUDACompiler.cmake:270 (message):
+[0.242s]   Failed to detect a default CUDA architecture.
+[0.242s] 
+[0.242s] 
+[0.242s] 
+[0.243s]   Compiler output:
+[0.243s] 
+[0.243s] Call Stack (most recent call first):
+[0.243s]   CMakeLists.txt:2 (project)
+[0.243s] 
+[0.243s] 
+[0.243s] -- Configuring incomplete, errors occurred!
+[0.248s] Invoked command in '/home/geo/thesis/cpp_ws/ros2_impl/build/s2m2_inference_cpp_pkg' returned '1': AMENT_PREFIX_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces:${AMENT_PREFIX_PATH} CMAKE_PREFIX_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces:/home/geo/ros2_ws/install/custom_benchmark_msgs:/opt/ros/jazzy/opt/gz_math_vendor:/opt/ros/jazzy/opt/gz_utils_vendor:/opt/ros/jazzy/opt/gz_cmake_vendor:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com LD_LIBRARY_PATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib:${LD_LIBRARY_PATH} PYTHONPATH=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages:${PYTHONPATH} /bin/cmake /home/geo/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg -DCMAKE_INSTALL_PREFIX=/home/geo/thesis/cpp_ws/ros2_impl/install/s2m2_inference_cpp_pkg

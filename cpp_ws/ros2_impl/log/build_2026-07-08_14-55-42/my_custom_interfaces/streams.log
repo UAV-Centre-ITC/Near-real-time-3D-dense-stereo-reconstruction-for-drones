@@ -1,0 +1,276 @@
+[0.018s] Invoking command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake /home/geo/thesis/cpp_ws/ros2_impl/my_custom_interfaces -DCMAKE_INSTALL_PREFIX=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces
+[0.184s] -- The C compiler identification is GNU 13.3.0
+[0.331s] -- The CXX compiler identification is GNU 13.3.0
+[0.372s] -- Detecting C compiler ABI info
+[0.575s] -- Detecting C compiler ABI info - done
+[0.597s] -- Check for working C compiler: /bin/cc - skipped
+[0.600s] -- Detecting C compile features
+[0.601s] -- Detecting C compile features - done
+[0.623s] -- Detecting CXX compiler ABI info
+[0.811s] -- Detecting CXX compiler ABI info - done
+[0.833s] -- Check for working CXX compiler: /bin/c++ - skipped
+[0.834s] -- Detecting CXX compile features
+[0.835s] -- Detecting CXX compile features - done
+[0.850s] -- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[1.145s] -- Found Python3: /bin/python3 (found version "3.12.3") found components: Interpreter 
+[1.323s] -- Found builtin_interfaces: 2.0.3 (/opt/ros/jazzy/share/builtin_interfaces/cmake)
+[1.389s] -- Found rosidl_generator_c: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_c/cmake)
+[1.411s] -- Found rosidl_generator_cpp: 4.6.7 (/opt/ros/jazzy/share/rosidl_generator_cpp/cmake)
+[1.439s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.469s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.495s] -- Found std_msgs: 5.3.7 (/opt/ros/jazzy/share/std_msgs/cmake)
+[1.526s] -- Found rosidl_default_generators: 1.6.0 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+[1.556s] -- Found rosidl_adapter: 4.6.7 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+[2.845s] -- Found ament_cmake_ros: 0.12.0 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+[4.575s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[5.289s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[5.299s] -- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+[5.616s] -- Found PythonExtra: /bin/python3  
+[6.568s] -- Found Python3: /bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+[6.784s] -- Found Python3: /bin/python3 (found version "3.12.3") found components: Interpreter 
+[6.806s] -- Configuring done (6.8s)
+[6.892s] -- Generating done (0.1s)
+[6.920s] -- Build files have been written to: /home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces
+[6.939s] Invoked command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake /home/geo/thesis/cpp_ws/ros2_impl/my_custom_interfaces -DCMAKE_INSTALL_PREFIX=/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces
+[6.942s] Invoking command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake --build /home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces -- -j12 -l12
+[7.034s] [  2%] [34m[1mGenerating type hashes for ROS interfaces[0m
+[7.034s] [  4%] [34m[1mGenerating Rust code for ROS interfaces[0m
+[7.046s] [  4%] Built target ament_cmake_python_copy_my_custom_interfaces
+[7.470s] [  4%] Built target my_custom_interfaces__rosidl_generator_type_description
+[7.495s] [  6%] [34m[1mGenerating C code for ROS interfaces[0m
+[7.520s] [  8%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[7.551s] running egg_info
+[7.553s] creating my_custom_interfaces.egg-info
+[7.556s] [  8%] Built target my_custom_interfaces__rs
+[7.600s] writing my_custom_interfaces.egg-info/PKG-INFO
+[7.601s] writing dependency_links to my_custom_interfaces.egg-info/dependency_links.txt
+[7.601s] writing top-level names to my_custom_interfaces.egg-info/top_level.txt
+[7.601s] writing manifest file 'my_custom_interfaces.egg-info/SOURCES.txt'
+[7.743s] reading manifest file 'my_custom_interfaces.egg-info/SOURCES.txt'
+[7.745s] writing manifest file 'my_custom_interfaces.egg-info/SOURCES.txt'
+[7.799s] [  8%] Built target ament_cmake_python_build_my_custom_interfaces_egg
+[8.005s] [  8%] Built target my_custom_interfaces__cpp
+[8.273s] [ 11%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/qmatrix_stamped__description.c.o[0m
+[8.280s] [ 13%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/qmatrix_stamped__functions.c.o[0m
+[8.280s] [ 15%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.c.o[0m
+[8.281s] [ 17%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/gpu_metrics__description.c.o[0m
+[8.281s] [ 20%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/gpu_metrics__functions.c.o[0m
+[8.282s] [ 22%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_c.dir/rosidl_generator_c/my_custom_interfaces/msg/detail/gpu_metrics__type_support.c.o[0m
+[8.395s] [ 24%] [32m[1mLinking C shared library libmy_custom_interfaces__rosidl_generator_c.so[0m
+[8.481s] [ 24%] Built target my_custom_interfaces__rosidl_generator_c
+[8.497s] [ 26%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[8.500s] [ 28%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[8.501s] [ 31%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[8.502s] [ 33%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[8.503s] [ 35%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[8.506s] [ 37%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[9.104s] [ 40%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/my_custom_interfaces/msg/gpu_metrics__type_support.cpp.o[0m
+[9.111s] [ 42%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/my_custom_interfaces/msg/qmatrix_stamped__type_support.cpp.o[0m
+[9.116s] [ 44%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.c.o[0m
+[9.121s] [ 46%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/my_custom_interfaces/msg/qmatrix_stamped__type_support.cpp.o[0m
+[9.123s] [ 48%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/my_custom_interfaces/msg/gpu_metrics__type_support.cpp.o[0m
+[9.123s] [ 51%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/my_custom_interfaces/msg/detail/gpu_metrics__type_support.c.o[0m
+[9.123s] [ 53%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support_c.cpp.o[0m
+[9.125s] [ 55%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/my_custom_interfaces/msg/detail/gpu_metrics__type_support_c.cpp.o[0m
+[9.125s] [ 57%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.cpp.o[0m
+[9.126s] [ 60%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/my_custom_interfaces/msg/detail/gpu_metrics__type_support.cpp.o[0m
+[9.195s] [ 62%] [32m[1mLinking C shared library libmy_custom_interfaces__rosidl_typesupport_introspection_c.so[0m
+[9.218s] [ 64%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/my_custom_interfaces/msg/detail/dds_fastrtps/qmatrix_stamped__type_support.cpp.o[0m
+[9.220s] [ 66%] [32mBuilding CXX object CMakeFiles/my_custom_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/my_custom_interfaces/msg/detail/dds_fastrtps/gpu_metrics__type_support.cpp.o[0m
+[9.243s] [ 68%] [32m[1mLinking CXX shared library libmy_custom_interfaces__rosidl_typesupport_c.so[0m
+[9.258s] [ 68%] Built target my_custom_interfaces__rosidl_typesupport_introspection_c
+[9.373s] [ 68%] Built target my_custom_interfaces__rosidl_typesupport_c
+[9.822s] [ 71%] [32m[1mLinking CXX shared library libmy_custom_interfaces__rosidl_typesupport_introspection_cpp.so[0m
+[9.927s] [ 73%] [32m[1mLinking CXX shared library libmy_custom_interfaces__rosidl_typesupport_cpp.so[0m
+[9.948s] [ 73%] Built target my_custom_interfaces__rosidl_typesupport_introspection_cpp
+[10.011s] [ 73%] Built target my_custom_interfaces__rosidl_typesupport_cpp
+[10.155s] [ 75%] [32m[1mLinking CXX shared library libmy_custom_interfaces__rosidl_typesupport_fastrtps_cpp.so[0m
+[10.194s] [ 77%] [32m[1mLinking CXX shared library libmy_custom_interfaces__rosidl_typesupport_fastrtps_c.so[0m
+[10.280s] [ 77%] Built target my_custom_interfaces__rosidl_typesupport_fastrtps_cpp
+[10.282s] [ 77%] Built target my_custom_interfaces__rosidl_typesupport_fastrtps_c
+[10.317s] [ 77%] Built target my_custom_interfaces
+[10.354s] [ 80%] [34m[1mGenerating Python code for ROS interfaces[0m
+[10.875s] [ 80%] Built target my_custom_interfaces__py
+[10.903s] [ 82%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_py.dir/rosidl_generator_py/my_custom_interfaces/msg/_gpu_metrics_s.c.o[0m
+[10.903s] [ 84%] [32mBuilding C object CMakeFiles/my_custom_interfaces__rosidl_generator_py.dir/rosidl_generator_py/my_custom_interfaces/msg/_qmatrix_stamped_s.c.o[0m
+[11.064s] [ 86%] [32m[1mLinking C shared library libmy_custom_interfaces__rosidl_generator_py.so[0m
+[11.120s] [ 86%] Built target my_custom_interfaces__rosidl_generator_py
+[11.146s] [ 91%] [32mBuilding C object CMakeFiles/my_custom_interfaces_s__rosidl_typesupport_introspection_c.dir/rosidl_generator_py/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[11.146s] [ 91%] [32mBuilding C object CMakeFiles/my_custom_interfaces_s__rosidl_typesupport_c.dir/rosidl_generator_py/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_c.c.o[0m
+[11.147s] [ 93%] [32mBuilding C object CMakeFiles/my_custom_interfaces_s__rosidl_typesupport_fastrtps_c.dir/rosidl_generator_py/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[11.258s] [ 97%] [32m[1mLinking C shared module rosidl_generator_py/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_c.so[0m
+[11.259s] [ 97%] [32m[1mLinking C shared module rosidl_generator_py/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_introspection_c.so[0m
+[11.267s] [100%] [32m[1mLinking C shared module rosidl_generator_py/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_fastrtps_c.so[0m
+[11.296s] [100%] Built target my_custom_interfaces_s__rosidl_typesupport_c
+[11.297s] [100%] Built target my_custom_interfaces_s__rosidl_typesupport_introspection_c
+[11.305s] [100%] Built target my_custom_interfaces_s__rosidl_typesupport_fastrtps_c
+[11.320s] Invoked command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake --build /home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces -- -j12 -l12
+[11.332s] Invoking command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake --install /home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces
+[11.342s] -- Install configuration: ""
+[11.342s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/ament_index/resource_index/rosidl_interfaces/my_custom_interfaces
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/QmatrixStamped.json
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/GpuMetrics.json
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__functions.h
+[11.343s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.h
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__functions.c
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__struct.h
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__description.c
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__type_support.h
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__description.c
+[11.344s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__type_support.c
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.c
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__struct.h
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__functions.h
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__functions.c
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/gpu_metrics.h
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/rosidl_generator_c__visibility_control.h
+[11.345s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/qmatrix_stamped.h
+[11.346s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/library_path.sh
+[11.346s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/library_path.dsv
+[11.346s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_generator_c.so
+[11.347s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_generator_c.so" to ""
+[11.347s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.347s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.347s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[11.347s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.347s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__rosidl_typesupport_fastrtps_c.h
+[11.347s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__rosidl_typesupport_fastrtps_c.h
+[11.347s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_fastrtps_c.so
+[11.348s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_fastrtps_c.so" to ""
+[11.348s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.348s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.348s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.348s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__builder.hpp
+[11.348s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__traits.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__struct.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__type_support.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__builder.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__traits.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__struct.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp
+[11.349s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/gpu_metrics.hpp
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/qmatrix_stamped.hpp
+[11.350s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.350s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.350s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__rosidl_typesupport_fastrtps_cpp.hpp
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__rosidl_typesupport_fastrtps_cpp.hpp
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/dds_fastrtps
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[11.350s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_fastrtps_cpp.so
+[11.351s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_fastrtps_cpp.so" to ""
+[11.351s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.351s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.351s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.351s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__rosidl_typesupport_introspection_c.h
+[11.352s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__rosidl_typesupport_introspection_c.h
+[11.352s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__type_support.c
+[11.352s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.c
+[11.352s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[11.352s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_introspection_c.so
+[11.352s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_introspection_c.so" to ""
+[11.353s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_c.so
+[11.353s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_c.so" to ""
+[11.353s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces
+[11.353s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg
+[11.353s] -- Up-to-date: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail
+[11.353s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__rosidl_typesupport_introspection_cpp.hpp
+[11.354s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/gpu_metrics__type_support.cpp
+[11.354s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__rosidl_typesupport_introspection_cpp.hpp
+[11.354s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/include/my_custom_interfaces/my_custom_interfaces/msg/detail/qmatrix_stamped__type_support.cpp
+[11.354s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_introspection_cpp.so
+[11.354s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_introspection_cpp.so" to ""
+[11.354s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_cpp.so
+[11.355s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_typesupport_cpp.so" to ""
+[11.355s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/pythonpath.sh
+[11.355s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/pythonpath.dsv
+[11.355s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces-0.0.0-py3.12.egg-info
+[11.355s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces-0.0.0-py3.12.egg-info/dependency_links.txt
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces-0.0.0-py3.12.egg-info/top_level.txt
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces-0.0.0-py3.12.egg-info/PKG-INFO
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces-0.0.0-py3.12.egg-info/SOURCES.txt
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_c.c
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_fastrtps_c.so
+[11.356s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/__init__.py
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_introspection_c.so
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_introspection_c.c
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_c.so
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/_my_custom_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/__init__.py
+[11.357s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_qmatrix_stamped_s.c
+[11.358s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_gpu_metrics_s.c
+[11.358s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_qmatrix_stamped.py
+[11.358s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_gpu_metrics.py
+[11.398s] Listing '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces'...
+[11.398s] Compiling '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/__init__.py'...
+[11.398s] Listing '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg'...
+[11.398s] Compiling '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/__init__.py'...
+[11.398s] Compiling '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_gpu_metrics.py'...
+[11.398s] Compiling '/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/msg/_qmatrix_stamped.py'...
+[11.403s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_fastrtps_c.so
+[11.404s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_fastrtps_c.so" to ""
+[11.404s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_introspection_c.so
+[11.404s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_introspection_c.so" to ""
+[11.404s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_c.so
+[11.405s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/python3.12/site-packages/my_custom_interfaces/my_custom_interfaces_s__rosidl_typesupport_c.so" to ""
+[11.405s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_generator_py.so
+[11.405s] -- Set non-toolchain portion of runtime path of "/home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/lib/libmy_custom_interfaces__rosidl_generator_py.so" to ""
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/ament_index/resource_index/rust_packages/my_custom_interfaces
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/src
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/src/lib.rs
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/src/msg
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/src/msg/rmw.rs
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/src/msg.rs
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/Cargo.toml
+[11.406s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/rust/build.rs
+[11.407s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/QmatrixStamped.idl
+[11.407s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/GpuMetrics.idl
+[11.407s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/QmatrixStamped.msg
+[11.407s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/msg/GpuMetrics.msg
+[11.407s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/ament_index/resource_index/package_run_dependencies/my_custom_interfaces
+[11.408s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/ament_index/resource_index/parent_prefix_path/my_custom_interfaces
+[11.408s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/ament_prefix_path.sh
+[11.408s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/ament_prefix_path.dsv
+[11.408s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/path.sh
+[11.408s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/environment/path.dsv
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/local_setup.bash
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/local_setup.sh
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/local_setup.zsh
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/local_setup.dsv
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/package.dsv
+[11.409s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/ament_index/resource_index/packages/my_custom_interfaces
+[11.410s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_generator_cExport.cmake
+[11.410s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_generator_cExport-noconfig.cmake
+[11.410s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_typesupport_fastrtps_cExport.cmake
+[11.410s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[11.410s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_generator_cppExport.cmake
+[11.411s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_typesupport_fastrtps_cppExport.cmake
+[11.411s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[11.411s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_introspection_cExport.cmake
+[11.411s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[11.411s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_cExport.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_cExport-noconfig.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_introspection_cppExport.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_cppExport.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfaces__rosidl_typesupport_cppExport-noconfig.cmake
+[11.412s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_generator_pyExport.cmake
+[11.413s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/export_my_custom_interfaces__rosidl_generator_pyExport-noconfig.cmake
+[11.413s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/rosidl_cmake-extras.cmake
+[11.413s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/ament_cmake_export_dependencies-extras.cmake
+[11.413s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/ament_cmake_export_include_directories-extras.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/ament_cmake_export_libraries-extras.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/ament_cmake_export_targets-extras.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfacesConfig.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/cmake/my_custom_interfacesConfig-version.cmake
+[11.414s] -- Installing: /home/geo/thesis/cpp_ws/ros2_impl/install/my_custom_interfaces/share/my_custom_interfaces/package.xml
+[11.418s] Invoked command in '/home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\]$(parse_git_branch)\[\033[00m\]$ /bin/cmake --install /home/geo/thesis/cpp_ws/ros2_impl/build/my_custom_interfaces

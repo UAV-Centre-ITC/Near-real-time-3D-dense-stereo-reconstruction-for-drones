@@ -1,0 +1,31 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from my_custom_interfaces/msg/GpuMetrics.msg
+// generated code does not contain a copyright notice
+
+#include "builtin_interfaces/msg/Time.idl"
+
+module my_custom_interfaces {
+  module msg {
+    struct GpuMetrics {
+      uint64 min_memory_mb;
+
+      uint64 max_memory_mb;
+
+      float avg_memory_mb;
+
+      float min_power_w;
+
+      float max_power_w;
+
+      float avg_power_w;
+
+      float pcie_tx_bw_percentage;
+
+      float pcie_rx_bw_percentage;
+
+      @verbatim (language="comment", text=
+        "time at which the data is measured")
+      builtin_interfaces::msg::Time stamp;
+    };
+  };
+};

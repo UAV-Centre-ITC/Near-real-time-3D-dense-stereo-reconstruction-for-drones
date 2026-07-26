@@ -6,8 +6,11 @@ if [ "$#" -ne 3 ]; then
     echo "Example: ./run_demo.sh ./data/left.jpg ./data/right.jpg 0.5"
     exit 1
 fi
+# --- FIX START: Convert inputs to Absolute Paths ---
+# This ensures the paths remain valid even after you 'cd' into other folders
 LEFT_IMG=$(realpath "$1")
 RIGHT_IMG=$(realpath "$2")
+# --- FIX END ---
 SCALE="$3"
 
 echo "=========================================="
