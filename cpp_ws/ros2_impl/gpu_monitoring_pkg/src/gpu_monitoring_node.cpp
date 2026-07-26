@@ -49,13 +49,13 @@ void GPUMonitoringNode::pollMetrics() {
     RCLCPP_ERROR(this->get_logger(), "Failed to get power usage");
     return;
   }
-  // Memory usage (MB)
+  // Memory usage (MB, published as GB)
   nvmlMemory_t memory_info;
   if (nvmlDeviceGetMemoryInfo(device_, &memory_info) == NVML_SUCCESS) {
-    unsigned long long memory_used = memory_info.used / (1024 * 1024);
-    min_mem_ = std::min(min_mem_, memory_info.used / (1024 * 1024));
-    max_mem_ = std::max(max_mem_, memory_info.used / (1024 * 1024));
-    mem_sum_ += memory_used;
+    unsigned long long memory_used_mb = memory_info.used / (1024 * 1024);
+    min_mem_ = std::min(min_mem_, memory_used_mb);
+    max_mem_ = std::max(max_mem_, memory_used_mb);
+    mem_sum_ += memory_used_mb;
   } else {
     RCLCPP_ERROR(this->get_logger(), "Failed to get memory usage");
     return;
@@ -81,11 +81,10 @@ void GPUMonitoringNode::pollMetrics() {
   metrics_msg.pcie_rx_bw_percentage = pcie_rx_bw_percentage_;
   metrics_msg.min_memory_mb = min_mem_;
   metrics_msg.max_memory_mb = max_mem_;
+  metrics_msg.avg_memory_mb = static_cast<float>(mem_sum_) / static_cast<float>(count_polls_);
   metrics_msg.min_power_w = static_cast<float>(min_power_) / 1000.0f;
   metrics_msg.max_power_w = static_cast<float>(max_power_) / 1000.0f;
-  // publish the metrics :
-  metrics_msg.avg_memory_mb = static_cast<float>(mem_sum_ / count_polls_);
-  metrics_msg.avg_power_w = static_cast<float>(power_sum_ / count_polls_) / 1000.0f;
+  metrics_msg.avg_power_w = static_cast<float>(power_sum_) / static_cast<float>(count_polls_) / 1000.0f;
   metrics_pub_->publish(metrics_msg);
   // reset the averaging window
   if (count_polls_ >= window_averaging_size_) {

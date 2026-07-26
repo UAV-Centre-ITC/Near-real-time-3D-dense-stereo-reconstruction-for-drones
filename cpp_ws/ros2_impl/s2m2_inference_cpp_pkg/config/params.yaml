@@ -1,22 +1,26 @@
 s2m2_node:
   ros__parameters:
-    engine_filepath: "/home/s3488977/thesis/alg-S2M2/weights/trt_save/S2M2_S_2464_2048_fp16.engine"
-    image_topic: "/keyframe_image" #raw topic name, not compressed!
-    transport_hints: "raw"
-    absolute_pose_topic: "/keyframe_pose"
-    min_keyframe_movement: 7.0
-    max_keyframe_angular: 0.15 #rad
-    max_keyframe_dZ: 0.35 #this should be low so that stereo works properly.  
-    occlusion_threshold: 0.5
-    confidence_threshold: 0.1
+    engine_filepath: "/home/s3488977/thesis/alg-S2M2/weights/trt_save/S2M2_S_2304_1728_fp16.engine"
+    image759_path: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/uav_samples/P1000759_1400496954965.JPG"
+    image760_path: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/uav_samples/P1000760_1400496954965.JPG"
+    image761_path: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/uav_samples/P1000761_1400496954965.JPG"
+    image762_path: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/uav_samples/P1000762_1400496954965.JPG"
+    # image_topic: "/keyframe_image" #raw topic name, not compressed!
+    # transport_hints: "raw"
+    # relative_pose_topic: "/keyframe_relative_pose" 
+    # absolute_pose_topic: "/keyframe_pose"
+    # min_keyframe_movement: 7.0
+    # max_keyframe_angular: 1.0 #rad
+    # max_keyframe_Z: 0.5 #this should be low so that stereo works properly.  
     time_profiling_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/assets/"
     rectified_images_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/s2m2_inference_cpp_pkg/assets/"
-    scale_factor: 1.0 # not used when we split the image to 4 patches. 
-    model_input_height: 2048 
-    model_input_width:  2464
-    save_disparity: false  
+    scale_factor: 0.5
+    target_input_height: 1728 
+    target_input_width: 2304
+    occlusion_threshold: 0.5 #marginal probability, higher means more certain that the pixel is valid, and common in left,right images. 
+    confidence_threshold: 0.1 #local sum of probabilities, higher means more sharp prob. distribution around the pixel, so more likely valid.
+    save_disparity: false 
     save_rectified_images: false
-    save_original_images: false
     visualize_disparity: false
     use_sim_time: false
 

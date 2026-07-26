@@ -19,13 +19,11 @@ Doxyfile
 __pycache__/
 #images : 
 testfiles_rectification/
-
 *.pcd
 # Prerequisites
 *.d
 #images: 
 *.png
-!figures_for_readme/*.png
 *.jpg
 *.jpeg
 *.JPG

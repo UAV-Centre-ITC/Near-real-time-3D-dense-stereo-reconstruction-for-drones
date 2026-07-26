@@ -55,11 +55,11 @@ def generate_launch_description():
         executable="gpu_monitoring_node",
         name="gpu_monitoring_node",
         output="screen",
+        # prefix="xterm -e gdb --args",
         parameters=[
             {"poll_frequency_hz": 20},
-            {"window_averaging_size": 100},  # samples
+            {"window_averaging_size": 200},
         ],
-        #        prefix="xterm -e gdb --args",
     )
     launch_actions.append(gpu_monitoring_node)
 

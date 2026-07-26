@@ -13,7 +13,6 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(my_custom_interfaces REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(CUDAToolkit REQUIRED)
@@ -76,7 +75,6 @@ ament_target_dependencies(s2m2_node
 	rclcpp 
 	sensor_msgs
 	geometry_msgs
-	my_custom_interfaces
        	cv_bridge
 	OpenCV
 	message_filters

@@ -14,11 +14,6 @@ struct TransformMatrix {
   float data[16];
 };
 
-void launchReprojectionCustomKernel(const cv::cuda::PtrStepSz<float> disp,
-                                    cv::cuda::PtrStepSz<float4> points3d,
-                                    const float *Q, const int offset_x,
-                                    const int offset_y, cudaStream_t stream);
-
 void launchTransformKernel(TransformMatrix T,
                            cv::cuda::PtrStepSz<float4> src_depthmap,
                            cv::cuda::PtrStepSz<float4> dst_depthmap, int rows,
