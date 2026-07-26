@@ -1,0 +1,20 @@
+ffs_node:
+  ros__parameters:
+    engine_filepath: "/home/s3488977/Fast-FoundationStereo/my_engine_output/fast_foundationstereo.engine"
+    plugin_filepath: "/home/s3488977/Fast-FoundationStereo/cpp/build/libffs_gwc_plugin.so"
+    image_topic: "/keyframe_image" #raw topic name, not compressed!
+    transport_hints: "raw"
+    absolute_pose_topic: "/keyframe_pose"
+    min_keyframe_movement: 7.0
+    max_keyframe_angular: 0.15 #rad
+    max_keyframe_Z: 0.35 #this should be low so that stereo works properly.  
+    time_profiling_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/ffs_inference_cpp_pkg/assets/"
+    rectified_images_dirpath: "/home/s3488977/thesis/cpp_ws/ros2_impl/ffs_inference_cpp_pkg/assets/"
+    scale_factor: 1.0 # not used when we split the image to 4 patches. 
+    model_input_height: 1024 
+    model_input_width: 1248
+    save_disparity: false  
+    save_rectified_images: true
+    visualize_disparity: false
+    use_sim_time: true
+

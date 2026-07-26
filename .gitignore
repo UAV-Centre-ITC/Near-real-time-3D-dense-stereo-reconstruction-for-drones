@@ -1,16 +1,34 @@
 codes/s2m2/*
+build/
+install/
+log/
+timing_files/
+weights/
 .cache
 *.pth
 *.pyc 
+#doxygen files: 
+html/
+latex/
+Doxyfile
+#trt engine file : 
+*.engine
+#opencode cache : 
+.opencode
 #python cache files
 __pycache__/
-figures_for_readme/
-
+#images : 
 testfiles_rectification/
-weights/
+*.pcd
 # Prerequisites
 *.d
-
+#images: 
+*.png
+*.jpg
+*.jpeg
+*.JPG
+*.pfm
+*.jpg
 # Compiled Object files
 *.slo
 *.lo
@@ -20,6 +38,12 @@ weights/
 # Precompiled Headers
 *.gch
 *.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
 
 # Compiled Dynamic libraries
 *.so
@@ -41,22 +65,5 @@ weights/
 *.out
 *.app
 
-# --- CMake ---
-# Ignore the entire build directory
-build/
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-compile_commands.json
-
-# --- IDEs and Editors ---
-.cache/
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# --- ROS / PCL Specific ---
-# If you generate local documentation
-docs/doxygen_sqlite3.db
+# debug information files
+*.dwo
