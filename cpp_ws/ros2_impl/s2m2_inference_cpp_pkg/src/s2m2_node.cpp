@@ -415,7 +415,7 @@ void S2M2Node::processValidPair(cv::Mat &left_image, cv::Mat &right_image,
 
   // Reproject disparity to 3D points:
   cv::cuda::GpuMat &disp_gpu = s2m2_outputs[0];
-  runReprojectionTo3D(disp_gpu, Qmatrix, 0, 0, pass_t);
+  runReprojectionTo3D(disp_gpu, Qmatrix, pass_t);
 
   runTransformationWC(T_WC, pass_t);
 
@@ -633,13 +633,10 @@ void S2M2Node::filterPoints3D(cv::cuda::GpuMat &confidence,
 
 void S2M2Node::runReprojectionTo3D(cv::cuda::GpuMat &disp_gpu,
                                    const cv::Mat &Qmatrix,
-                                   const int patch_offset_x,
-                                   const int patch_offset_y,
                                    PassTimings &pass_t) {
   cudaEventRecord(start_reproject_, stream_);
   launchReprojectionCustomKernel(disp_gpu, points3d_homog_gpu_,
-                                 Qmatrix.ptr<float>(), patch_offset_x,
-                                 patch_offset_y, stream_);
+                                 Qmatrix.ptr<float>(), stream_);
   cudaEventRecord(end_reproject_, stream_);
   cudaEventSynchronize(end_reproject_);
   float elapsed_reproject_ms;

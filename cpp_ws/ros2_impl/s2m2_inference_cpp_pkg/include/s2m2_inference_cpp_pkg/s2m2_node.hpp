@@ -229,15 +229,10 @@ public:
    * using a custom CUDA kernel.
    * @param disp_gpu Disparity map (GPU mat, CV_32FC1).
    * @param Qmatrix Stereo Q-matrix (4x4, CV_32FC1).
-   * @param patch_offset_x Horizontal offset of the current image patch (0 for
-   * full-resolution).
-   * @param patch_offset_y Vertical offset of the current image patch (0 for
-   * full-resolution).
    * @param pass_t Output: per-pass timing samples.
    */
   void runReprojectionTo3D(cv::cuda::GpuMat &disp_gpu, const cv::Mat &Qmatrix,
-                           const int patch_offset_x, const int patch_offset_y,
-                           PassTimings &pass_t);
+                            PassTimings &pass_t);
 
   /**
    * @brief Applies the world-to-camera transform to the 3D homogeneous points
